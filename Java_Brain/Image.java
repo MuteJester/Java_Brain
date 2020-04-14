@@ -778,7 +778,7 @@ class Math_Toolbox{
 		int rand = ThreadLocalRandom.current().nextInt(lower,upper);		
 		return rand;
 	}
-	public double random_double_in_range(double lower,double upper) {
+	public static double random_double_in_range(double lower,double upper) {
 		double rand = ThreadLocalRandom.current().nextDouble(lower,upper);		
 		return rand;
 	}
@@ -797,7 +797,39 @@ class Math_Toolbox{
        
         return to;
     }	
-		
+	// Get a random numbers between min and max
+    public static float RandomFloat(float min, float max) {
+        float a = (float) Math.random();
+        float num = min + (float) Math.random() * (max - min);
+        if(a < 0.5)
+            return num;
+        else
+            return -num;
+    }
+    
+    // Sigmoid function
+    public static double Sigmoid(double x) {
+        return (float) (1/(1+Math.pow(Math.E, -x)));
+    }
+    
+    // Derivative of the sigmoid function
+    public static double SigmoidDerivative(double x) {
+        return Sigmoid(x)*(1-Sigmoid(x));
+    }
+    
+    // Used for the backpropagation
+    public static double squaredError(double output,double target) {
+    	return (float) (0.5*Math.pow(2,(target-output)));
+    }
+    
+    // Used to calculate the overall error rate (not yet used)
+    public static double sumSquaredError(double[] outputs,double[] targets) {
+    	double sum = 0;
+    	for(int i=0;i<outputs.length;i++) {
+    		sum += squaredError(outputs[i],targets[i]);
+    	}
+    	return sum;
+    }
 }
 class Point{
 	

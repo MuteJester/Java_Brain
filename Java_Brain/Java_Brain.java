@@ -1020,3 +1020,233 @@ public class Java_Brain {
     }
     
 }
+
+
+
+
+
+
+class Neuron{
+	
+    double[] weights;
+    double[] backprop_weights;
+    double gradient;
+    double bias;
+    double value = 0;
+    
+	static double minWeightValue;
+	static double maxWeightValue;
+	
+	  // Constructor for the hidden / output neurons
+    public Neuron(double[] weights, double bias){
+        this.weights = weights;
+        this.bias = bias;
+        this.backprop_weights = this.weights;
+        this.gradient = 0;
+    }
+    
+    // Constructor for the input neurons
+    public Neuron(double value){
+        this.weights = null;
+        this.bias = -1;
+        this.backprop_weights = this.weights;
+        this.gradient = -1;
+        this.value = value;
+    }
+    
+    // Static function to set min and max weight for all variables
+    public static void setRangeWeight(double min,double max) {
+    	minWeightValue = min;
+    	maxWeightValue = max;
+    }
+    
+    // Function used at the end of the backprop to switch the calculated value in the
+    // cache weight in the weights
+    public void Update_Weights() {
+    	this.weights = this.backprop_weights;
+    }
+}
+
+class Neuron_Layer{
+	
+	public Neuron[] neurons;
+	
+	// Constructor for the hidden and output layer
+	public Neuron_Layer(int Neurons_Connections,int Number_of_Neurons) {
+		this.neurons = new Neuron[Number_of_Neurons];
+		
+		for(int i = 0; i < Number_of_Neurons; i++) {
+			double[] weights = new double[Neurons_Connections];
+			for(int j = 0; j < Neurons_Connections; j++) {
+				weights[j] = Math_Toolbox.random_double_in_range(Neuron.minWeightValue, Neuron.maxWeightValue);
+			}
+			neurons[i] = new Neuron(weights,Math_Toolbox.random_double_in_range(0, 1));
+		}
+	}
+	
+	
+	// Constructor for the input layer
+	public Neuron_Layer(double input[]) {
+		this.neurons = new Neuron[input.length];
+		for(int i = 0; i < input.length; i++) {
+			this.neurons[i] = new Neuron(input[i]);
+		}
+	}
+
+}
+
+class Data_Cartridge{
+	double[] Data;
+	double[] Expected_Output;
+	public Data_Cartridge(double[] in_data,double expected_out[]) {
+		this.Data=in_data;
+		this.Expected_Output=expected_out;
+	}
+	
+}
+
+class Training_Data{
+	Data_Cartridge[] Data;
+	
+	public Training_Data(){
+		
+	}
+	
+	public void Load_Columns_As_Data(Java_Brain Data_Set,int[] Data_Column_Number,int Result_Column) {
+		this.Data = new Data_Cartridge[Data_Set.Number_Of_Rows];
+		for(int i=0;i<Data.length;i++) {
+			double row_values[] = new  double[Data_Column_Number.length];
+			for(int j =0;j<Data_Column_Number.length;j++) {
+				row_values[j] = Double.parseDouble(Data_Set.CSV_Get_Value(i+1, Data_Column_Number[j]));
+			}
+			this.Data[i] = new Data_Cartridge(row_values,new double[] {Double.parseDouble(Data_Set.CSV_Get_Value(i+1, Result_Column))});
+			
+		}
+	}
+	
+	
+
+	public void Print_Data() {
+		for(int i=0;i<Data.length;i++) {
+			for(int j=0;j<this.Data[i].Data.length;j++) {
+				System.out.print(this.Data[i].Data[j] + " ");
+			}
+			System.out.print("\n");
+		}
+	}
+	
+}
+
+class Neural_Net{
+	static Neuron_Layer[] Layers;
+	Training_Data Training_Data;
+	double Learning_Rate;
+	public Neural_Net(int[] Topology_Of_Neurons,Training_Data Training_Data,double Learning_Rate) {
+		Neuron.setRangeWeight(-1, 1);
+		Layers = new Neuron_Layer[Topology_Of_Neurons.length/2 + 1];
+		Layers[0] = null;
+		int j =1;
+		for(int i=0;i<Topology_Of_Neurons.length;i+=2) {
+			Layers[j] = new Neuron_Layer(Topology_Of_Neurons[i],Topology_Of_Neurons[i+1]);
+			j++;
+			//System.out.println("Done " + i );
+		}
+		this.Training_Data=Training_Data;
+		this.Learning_Rate=Learning_Rate;
+	}
+	
+	 public void Forward_Data(double[] inputs) {
+	    	// First bring the inputs into the input layer layers[0]
+	    	Layers[0] = new Neuron_Layer(inputs);
+	        for(int i = 1; i < Layers.length; i++) {
+	        	for(int j = 0; j < Layers[i].neurons.length; j++) {
+	        		//summing the weights
+	        		double sum = 0;
+	        		for(int k = 0; k < Layers[i-1].neurons.length; k++) {
+	        			sum += Layers[i-1].neurons[k].value*Layers[i].neurons[j].weights[k];
+	        		}
+	        		//sum += layers[i].neurons[j].bias; // add in the bias 
+	        		Layers[i].neurons[j].value = Math_Toolbox.Sigmoid(sum);
+	        	}
+	        } 	
+	    }
+	
+	    // This function sums up all the gradient connecting a given neuron in a given layer
+	  public double sumGradient(int neuron_index,int layer_index) {
+		  double gradient_sum = 0;
+	    	Neuron_Layer current_layer = Layers[layer_index];
+	    	for(int i = 0; i < current_layer.neurons.length; i++) {
+	    		Neuron current_neuron = current_layer.neurons[i];
+	    		gradient_sum += current_neuron.weights[neuron_index]*current_neuron.gradient;
+	    	}
+	    	return gradient_sum;
+	    }
+	 
+	 public  void Back_Propagate(Data_Cartridge training_Data) {
+	    	
+	    	int number_layers = Layers.length;
+	    	int out_index = number_layers-1;
+	    	
+	    	// Update the output layers 
+	    	// For each output
+	    	for(int i = 0; i < Layers[out_index].neurons.length; i++) {
+	    		// and for each of their weights
+	    		double output = Layers[out_index].neurons[i].value;
+	    		double target = training_Data.Expected_Output[i];
+	    		double derivative = output-target;
+	    		double delta = derivative*(output*(1-output));
+	    		Layers[out_index].neurons[i].gradient = delta;
+	    		for(int j = 0; j < Layers[out_index].neurons[i].weights.length;j++) { 
+	    			double previous_output = Layers[out_index-1].neurons[j].value;
+	    			double error = delta*previous_output;
+	    			Layers[out_index].neurons[i].backprop_weights[j] = Layers[out_index].neurons[i].weights[j] - Learning_Rate*error;
+	    		}
+	    	}
+	    	
+	    	//Update all the subsequent hidden layers
+	    	for(int i = out_index-1; i > 0; i--) {
+	    		// For all neurons in that layers
+	    		for(int j = 0; j < Layers[i].neurons.length; j++) {
+	    			double output = Layers[i].neurons[j].value;
+	    			double gradient_sum = sumGradient(j,i+1);
+	    			double delta = (gradient_sum)*(output*(1-output));
+	    			Layers[i].neurons[j].gradient = delta;
+	    			// And for all their weights
+	    			for(int k = 0; k < Layers[i].neurons[j].weights.length; k++) {
+	    				double previous_output = Layers[i-1].neurons[k].value;
+	    				double error = delta*previous_output;
+	    				Layers[i].neurons[j].backprop_weights[k] = Layers[i].neurons[j].weights[k] - Learning_Rate*error;
+	    			}
+	    		}
+	    	}
+	    	
+	    	// Here we do another pass where we update all the weights
+	    	for(int i = 0; i< Layers.length;i++) {
+	    		for(int j = 0; j < Layers[i].neurons.length;j++) {
+	    			Layers[i].neurons[j].Update_Weights();
+	    		}
+	    	}
+	    	
+	    }
+	 public  void Start_Trainig(int Training_Iterations) {
+	    	for(int i = 0; i < Training_Iterations; i++) {
+	    		for(int j = 0; j < Training_Data.Data.length; j++) {
+	    			Forward_Data(Training_Data.Data[j].Data);
+	    			Back_Propagate(Training_Data.Data[j]);
+	    		}
+	    	}
+	    }
+	 public  void Print_Outputs_Neurons() {
+		 	System.out.println("============");
+	        System.out.println("Output After Training");
+	        System.out.println("============");
+	        for(int i = 0; i < Training_Data.Data.length; i++) {
+	        	Forward_Data(Training_Data.Data[i].Data);
+	        	for(int j=0;j<Layers[Layers.length-1].neurons.length;j++) {
+		            System.out.println(Layers[2].neurons[j].value);
+
+	        	}
+	        }
+	 }
+
+}
