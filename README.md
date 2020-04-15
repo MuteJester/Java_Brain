@@ -21,7 +21,7 @@
     <a href="https://github.com/MuteJester/Java_Brain"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/MuteJester/Java_Brain">View Demo</a>
+    <a href="https://github.com/MuteJester/Java_Brain/wiki/A-Simple-Example-Of-Java-Brain-Usage">View Demo</a>
     ·
     <a href="https://github.com/MuteJester/Java_Brain/issues">Report Bug</a>
     ·
