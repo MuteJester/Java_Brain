@@ -1141,8 +1141,8 @@ class Neural_Net{
 	static Neuron_Layer[] Layers;
 	Training_Data Training_Data;
 	double Learning_Rate;
-	public Neural_Net(int[] Topology_Of_Neurons,Training_Data Training_Data,double Learning_Rate) {
-		Neuron.setRangeWeight(-1, 1);
+	public Neural_Net(int[] Topology_Of_Neurons,Training_Data Training_Data,double Learning_Rate,double Min_Weight,double Max_Weight) {
+		Neuron.setRangeWeight(Min_Weight, Max_Weight);
 		Layers = new Neuron_Layer[Topology_Of_Neurons.length/2 + 1];
 		Layers[0] = null;
 		int j =1;
@@ -1154,8 +1154,7 @@ class Neural_Net{
 		this.Training_Data=Training_Data;
 		this.Learning_Rate=Learning_Rate;
 	}
-	
-	 public void Forward_Data(double[] inputs) {
+	public void Forward_Data(double[] inputs) {
 	    	// First bring the inputs into the input layer layers[0]
 	    	Layers[0] = new Neuron_Layer(inputs);
 	        for(int i = 1; i < Layers.length; i++) {
@@ -1188,39 +1187,39 @@ class Neural_Net{
 	    	int out_index = number_layers-1;
 	    	
 	    	// Update the output layers 
-	    	// For each output
-	    	for(int i = 0; i < Layers[out_index].neurons.length; i++) {
-	    		// and for each of their weights
-	    		double output = Layers[out_index].neurons[i].value;
-	    		double target = training_Data.Expected_Output[i];
-	    		double derivative = output-target;
-	    		double delta = derivative*(output*(1-output));
-	    		Layers[out_index].neurons[i].gradient = delta;
-	    		for(int j = 0; j < Layers[out_index].neurons[i].weights.length;j++) { 
-	    			double previous_output = Layers[out_index-1].neurons[j].value;
-	    			double error = delta*previous_output;
-	    			Layers[out_index].neurons[i].backprop_weights[j] = Layers[out_index].neurons[i].weights[j] - Learning_Rate*error;
-	    		}
-	    	}
-	    	
-	    	//Update all the subsequent hidden layers
-	    	for(int i = out_index-1; i > 0; i--) {
-	    		// For all neurons in that layers
-	    		for(int j = 0; j < Layers[i].neurons.length; j++) {
-	    			double output = Layers[i].neurons[j].value;
-	    			double gradient_sum = sumGradient(j,i+1);
-	    			double delta = (gradient_sum)*(output*(1-output));
-	    			Layers[i].neurons[j].gradient = delta;
-	    			// And for all their weights
-	    			for(int k = 0; k < Layers[i].neurons[j].weights.length; k++) {
-	    				double previous_output = Layers[i-1].neurons[k].value;
-	    				double error = delta*previous_output;
-	    				Layers[i].neurons[j].backprop_weights[k] = Layers[i].neurons[j].weights[k] - Learning_Rate*error;
-	    			}
-	    		}
-	    	}
-	    	
-	    	// Here we do another pass where we update all the weights
+	// For each output
+	for(int i = 0; i < Layers[out_index].neurons.length; i++) {
+		// and for each of their weights
+		double output = Layers[out_index].neurons[i].value;
+		double target = training_Data.Expected_Output[i];
+		double derivative = output-target;
+		double delta = derivative*(output*(1-output));
+		Layers[out_index].neurons[i].gradient = delta;
+		for(int j = 0; j < Layers[out_index].neurons[i].weights.length;j++) { 
+			double previous_output = Layers[out_index-1].neurons[j].value;
+			double error = delta*previous_output;
+			Layers[out_index].neurons[i].backprop_weights[j] = Layers[out_index].neurons[i].weights[j] - Learning_Rate*error;
+		}
+	}
+	
+	//Update all the subsequent hidden layers
+	for(int i = out_index-1; i > 0; i--) {
+		// For all neurons in that layers
+		for(int j = 0; j < Layers[i].neurons.length; j++) {
+			double output = Layers[i].neurons[j].value;
+			double gradient_sum = sumGradient(j,i+1);
+			double delta = (gradient_sum)*(output*(1-output));
+			Layers[i].neurons[j].gradient = delta;
+			// And for all their weights
+			for(int k = 0; k < Layers[i].neurons[j].weights.length; k++) {
+				double previous_output = Layers[i-1].neurons[k].value;
+				double error = delta*previous_output;
+				Layers[i].neurons[j].backprop_weights[k] = Layers[i].neurons[j].weights[k] - Learning_Rate*error;
+			}
+		}
+	}
+	
+	// Here we do another pass where we update all the weights
 	    	for(int i = 0; i< Layers.length;i++) {
 	    		for(int j = 0; j < Layers[i].neurons.length;j++) {
 	    			Layers[i].neurons[j].Update_Weights();
@@ -1238,15 +1237,20 @@ class Neural_Net{
 	    }
 	 public  void Print_Outputs_Neurons() {
 		 	System.out.println("============");
-	        System.out.println("Output After Training");
-	        System.out.println("============");
-	        for(int i = 0; i < Training_Data.Data.length; i++) {
-	        	Forward_Data(Training_Data.Data[i].Data);
-	        	for(int j=0;j<Layers[Layers.length-1].neurons.length;j++) {
-		            System.out.println(Layers[2].neurons[j].value);
-
-	        	}
-	        }
+	System.out.println("Output After Training");
+	System.out.println("============");
+		        	for(int j=0;j<Layers[Layers.length-1].neurons.length;j++) {
+			            System.out.println(Layers[Layers.length-1].neurons[j].value);
+		        }
 	 }
-
+	 
+	 
+	 //under dev
+	 public  void Save_Model(String Model_Name) {
+		 
+	 }
+	 public  void Load_Nodel(String Model_Name) {
+		 
+	 }
+	 
 }

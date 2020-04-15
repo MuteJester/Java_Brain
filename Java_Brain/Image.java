@@ -817,12 +817,10 @@ class Math_Toolbox{
         return Sigmoid(x)*(1-Sigmoid(x));
     }
     
-    // Used for the backpropagation
     public static double squaredError(double output,double target) {
     	return (float) (0.5*Math.pow(2,(target-output)));
     }
     
-    // Used to calculate the overall error rate (not yet used)
     public static double sumSquaredError(double[] outputs,double[] targets) {
     	double sum = 0;
     	for(int i=0;i<outputs.length;i++) {
