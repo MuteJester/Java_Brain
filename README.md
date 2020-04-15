@@ -18,7 +18,7 @@
   <p align="center">
     Simple Solution For Fast Programing Of Data Mining ,Deep Learning And Machine Learning Models As Well As CSV Management.
     <br />
-    <a href="https://github.com/MuteJester/Java_Brain"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/MuteJester/Java_Brain/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/MuteJester/Java_Brain/wiki/A-Simple-Example-Of-Java-Brain-Usage">View Demo</a>
