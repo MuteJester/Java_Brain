@@ -45,13 +45,13 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-There are a few Deep Learning And Machine Learning Java libraries out there, but none of them in my mind were simple enough to use and required the user to install loads of additional parts trough maven and etc.
-At that moment the idea to create a simple plug and play java classes which can be simply dragged into the src folder of any project and functionality of all the tools that the Java Brain library can be quickly and easily accesd and used.
+There are a few Deep Learning And Machine Learning Java libraries out there, but none of them in my mind were simple enough to use and required the user to install loads of additional parts trough maven, etc.
+At that moment the idea to create a simple plug and play java classes which can be simply dragged into the src folder of any project and functionality of all the tools that the Java Brain library can be quickly and easily accessed and used.
 
 Here's Why Java Brain :brain: :
 * It As Simple As Drag And Drop and you are ready to code!
-* Function and methods are named meaningful names that way it is always clear what are the parameters or what does the method do!
-* CSV handling is all included in the library working with them made much more easier trough java code!
+* Function and methods are named meaningful names that way it is always clear what are the parameters or what does the method does!
+* CSV handling is all included in the library working with them made much easier trough java code!
 
 ### Built With
 * [Eclipse](https://www.eclipse.org/)
@@ -62,7 +62,7 @@ Here's Why Java Brain :brain: :
 ### Installation
 1. Download Both Java Classes(Image and Java_Brain) From The Repository [Go To Repository Folder](https://github.com/MuteJester/Java_Brain/tree/master/Java_Brain)
 2. Copy Both Classes Into Your Projects /src Folder
-3. Your Are Ready To Code!
+3. You Are Ready To Code!
 
 <!-- USAGE EXAMPLES -->
 ## Usage
@@ -77,9 +77,9 @@ in the following exmaple a fast method for immediate ploting of a linear regress
 _Ploting Logistic Regression Algorithm_
 
 <img src="Examples/Logistic_regression_shoots.png" alt="Logo" width="600" height="600">
-Java Brain Offers Binary Logsitic Regression As Well As Multivariable Logistic Regression
-in the following exmaple a fast method for immediate ploting of a logistic regression model.
-the logistic regression functionality as well as the linear regression can be used as pleased
+Java Brain Offers Binary Logistic Regression As Well As Multivariable Logistic Regression
+in the following example a fast method for immediate plotting of a logistic regression model.
+the logistic regression functionality, as well as the linear regression, can be used as pleased
 the methods return the weights resulting after computing the optimal state using gradient descent;
 
 
@@ -95,11 +95,10 @@ calculations supported soon there will a higher dimension support system.
   * Linear Regression using Gradient Descent (Multivariable regression supported using matrix with Lasso Regression and L1 Regularization)
   * Logistic Regression of binary variable as well as multivariable equations
   * Validation Of Logistic Regression - Confusion Matrix
-  * K-Means calculation (up to 3 dimensional data variables)
+  * K-Means calculation (up to 3-dimensional data variables)
   * Fully Connected Neural Network contracting class accepting all forms of network topologies for dynamic use
-  * Statistical error computations like MSE,R^2,Adj-R^2,Pearsons -  for most models
-  * Some of the models have a supported validation methods which will automaticly compare machine guesses against actual values
-  
+  * Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models
+  * Some of the models have supported validation methods which will automatically compare machine guesses against actual values
   
   ### Currently Supported CSV Handling Functionality
   
@@ -135,14 +134,14 @@ See the [open issues](https://github.com/MuteJester/Java_Brain/issues) for a lis
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such a powerfull place to create new ideas, inspire, and make progress. Any contributions you make are **greatly appreciated**.
+
+Contributions are what make the open-source community such a powerful place to create new ideas, inspire, and make progress. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
 
 
 <!-- LICENSE -->
