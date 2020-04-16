@@ -96,7 +96,7 @@ calculations supported soon there will a higher dimension support system.
   * Logistic Regression of binary variable as well as multivariable equations
   * Validation Of Logistic Regression - Confusion Matrix
   * K-Means calculation (up to 3-dimensional data variables)
-  * Fully Connected Neural Network contracting class accepting all forms of network topologies for dynamic use
+  * Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use
   * Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models
   * Some of the models have supported validation methods which will automatically compare machine guesses against actual values
   
