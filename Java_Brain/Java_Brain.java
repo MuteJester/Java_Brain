@@ -1,5 +1,11 @@
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -103,7 +109,7 @@ public class Java_Brain {
 		csvWriter.close();
 	}
 	public double Get_Max_Value_In_Column(int Column_Number) {
-		ArrayList<String> col = this.Get_Spesific_Column(Column_Number);
+		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
 		double max = Double.MIN_VALUE;
 		for(int i =0;i<this.Number_Of_Rows;i++) {
 			double cur_val = Double.parseDouble(col.get(i));
@@ -128,14 +134,14 @@ public class Java_Brain {
 			System.out.println(" ");
 		}
 	}
-	public ArrayList<String> Get_Spesific_Row(int Row_Number) {
+	public ArrayList<String> Get_Specific_Row(int Row_Number) {
 		if(Row_Number < 0 || Row_Number > this.Number_Of_Rows) {
 			System.out.println("Invalid Row Number");
 			return null;
 		}
 		return this.CSV_DATA.get(Row_Number-1);
 	}
-	public ArrayList<String> Get_Spesific_Column(int Column_Number){
+	public ArrayList<String> Get_Specific_Column(int Column_Number){
 		if(Column_Number < 0 || Column_Number > this.Number_Of_Columns) {
 			System.out.println("Invalid Row Number");
 			return null;
@@ -186,7 +192,7 @@ public class Java_Brain {
 		Split.CSV_DATA = new ArrayList<ArrayList<String>>();
 		
 		for(int i = this.Number_Of_Rows-number_of_rows;i<=this.Number_Of_Rows;i++) {
-			ArrayList<String> temp = new ArrayList<String>(this.Get_Spesific_Row(i));
+			ArrayList<String> temp = new ArrayList<String>(this.Get_Specific_Row(i));
 			Split.CSV_DATA.add(temp);
 		}
 		
@@ -202,8 +208,8 @@ public class Java_Brain {
 		
 	}
 	public ArrayList<Point> Column_To_Point_List(int Column_X,int Column_Y){
-		ArrayList<String> X = this.Get_Spesific_Column(Column_X);
-		ArrayList<String> Y = this.Get_Spesific_Column(Column_Y);
+		ArrayList<String> X = this.Get_Specific_Column(Column_X);
+		ArrayList<String> Y = this.Get_Specific_Column(Column_Y);
 		ArrayList<Point> p = new ArrayList<Point>();
 		for(int i =0;i<this.Number_Of_Rows;i++) {
 			p.add(new Point(Double.parseDouble(X.get(i)),Double.parseDouble(Y.get(i)),0));
@@ -220,9 +226,9 @@ public class Java_Brain {
 		
 	}
 	public ArrayList<Point> Column_To_Point_List(int Column_X,int Column_Y,int Column_Z){
-		ArrayList<String> X = this.Get_Spesific_Column(Column_X);
-		ArrayList<String> Y = this.Get_Spesific_Column(Column_Y);
-		ArrayList<String> Z = this.Get_Spesific_Column(Column_Z);
+		ArrayList<String> X = this.Get_Specific_Column(Column_X);
+		ArrayList<String> Y = this.Get_Specific_Column(Column_Y);
+		ArrayList<String> Z = this.Get_Specific_Column(Column_Z);
 		ArrayList<Point> p = new ArrayList<Point>();
 		for(int i =0;i<this.Number_Of_Rows;i++) {
 			p.add(new Point(Double.parseDouble(X.get(i)),Double.parseDouble(Z.get(i)),Double.parseDouble(Z.get(i))));
@@ -693,7 +699,7 @@ public class Java_Brain {
 		return Prediction;
 		
 	}
-	public Matrix Linear_Regression_Gradient_DescentM(ArrayList<Integer> Columns_Of_Sampels,ArrayList<String> True_Y,double Leaning_Rate,int number_of_iterations) {
+	public Matrix Linear_Regression_Multivariable(ArrayList<Integer> Columns_Of_Sampels,ArrayList<String> True_Y,double Leaning_Rate,int number_of_iterations) {
 		//y = mx + b - for slope calculation
 		Matrix LE = new Matrix(Columns_Of_Sampels.size()+1,1);
 		for(int i = 0;i<number_of_iterations;i++) {
@@ -832,7 +838,7 @@ public class Java_Brain {
 			for(int j=1;j<Columns_Of_Sampels.size()+1;j++) {
 				pred += LR.Matrix_Body[j][0]*Double.parseDouble(this.CSV_Get_Value(i, Columns_Of_Sampels.get(j-1)));
 			}
-			System.out.println("Predictions: " + pred + "  Actual "  + this.Get_Spesific_Column(True_Column).get(i-1));
+			System.out.println("Predictions: " + pred + "  Actual "  + this.Get_Specific_Column(True_Column).get(i-1));
 			res.add(String.format("%f", pred));
 		}
 		return res;
@@ -1123,8 +1129,6 @@ class Training_Data{
 			
 		}
 	}
-	
-	
 
 	public void Print_Data() {
 		for(int i=0;i<Data.length;i++) {
@@ -1138,9 +1142,14 @@ class Training_Data{
 }
 
 class Neural_Net{
-	static Neuron_Layer[] Layers;
+	Neuron_Layer[] Layers;
 	Training_Data Training_Data;
+	//for model constructing and reconstructing 
+	int[] Topology_Of_Neurons;
 	double Learning_Rate;
+	double Min_Weight;
+	double Max_Weight;
+	
 	public Neural_Net(int[] Topology_Of_Neurons,Training_Data Training_Data,double Learning_Rate,double Min_Weight,double Max_Weight) {
 		Neuron.setRangeWeight(Min_Weight, Max_Weight);
 		Layers = new Neuron_Layer[Topology_Of_Neurons.length/2 + 1];
@@ -1149,11 +1158,82 @@ class Neural_Net{
 		for(int i=0;i<Topology_Of_Neurons.length;i+=2) {
 			Layers[j] = new Neuron_Layer(Topology_Of_Neurons[i],Topology_Of_Neurons[i+1]);
 			j++;
-			//System.out.println("Done " + i );
 		}
+		
 		this.Training_Data=Training_Data;
 		this.Learning_Rate=Learning_Rate;
+		this.Min_Weight=Min_Weight;
+		this.Max_Weight=Max_Weight;
+		this.Topology_Of_Neurons = Topology_Of_Neurons;
 	}
+	public Neural_Net(String Brain_File_Saved_Model) throws IOException {
+		DataInputStream in;
+		if(!Brain_File_Saved_Model.contains(".Brain")) {
+			System.out.println("Unkown File Format Specifed, Please Use Only Java_Brain Supported Formats");
+			return;
+		}
+		try {
+			int sampler;
+			in = new DataInputStream(new FileInputStream(Brain_File_Saved_Model));
+			this.Learning_Rate = in.readDouble();
+			this.Max_Weight = in.readDouble();
+			this.Min_Weight = in.readDouble();
+			sampler = in.readInt();
+			this.Topology_Of_Neurons=new int[sampler];
+			for(int i=0;i<sampler;i++) {
+				this.Topology_Of_Neurons[i] = in.readInt();
+			}
+			
+			Neuron.setRangeWeight(Min_Weight, Max_Weight);
+			Layers = new Neuron_Layer[Topology_Of_Neurons.length/2 + 1];
+			Layers[0] = null;
+			int j =1;
+			for(int i=0;i<Topology_Of_Neurons.length;i+=2) {
+				Layers[j] = new Neuron_Layer(Topology_Of_Neurons[i],Topology_Of_Neurons[i+1]);
+				j++;
+			}
+			
+			//reading layer structure
+			
+			for(int layer=1;layer<this.Layers.length;layer++) {
+				for(int ners =0;ners<this.Layers[layer].neurons.length;ners++) {
+					
+					this.Layers[layer].neurons[ners].bias = in.readDouble();
+					this.Layers[layer].neurons[ners].gradient = in.readDouble();
+					this.Layers[layer].neurons[ners].value = in.readDouble();
+
+					this.Layers[layer].neurons[ners].backprop_weights = new double[in.readInt()];
+					double backprop =  this.Layers[layer].neurons[ners].backprop_weights.length;
+					for(int m = 0 ; m <backprop;m++) {
+						this.Layers[layer].neurons[ners].backprop_weights[m] = in.readDouble();
+					}
+					
+					this.Layers[layer].neurons[ners].weights = new double[in.readInt()];
+					double weight = this.Layers[layer].neurons[ners].weights.length;
+					for(int m = 0 ; m <weight;m++) {
+						this.Layers[layer].neurons[ners].weights[m]=in.readDouble();
+					}
+
+
+
+					
+				}
+			}	
+			
+	
+				
+			
+			
+			
+			
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+	};
+
 	public void Forward_Data(double[] inputs) {
 	    	// First bring the inputs into the input layer layers[0]
 	    	Layers[0] = new Neuron_Layer(inputs);
@@ -1227,7 +1307,7 @@ class Neural_Net{
 	    	}
 	    	
 	    }
-	 public  void Start_Trainig(int Training_Iterations) {
+	 public  void Start_Training(int Training_Iterations) {
 	    	for(int i = 0; i < Training_Iterations; i++) {
 	    		for(int j = 0; j < Training_Data.Data.length; j++) {
 	    			Forward_Data(Training_Data.Data[j].Data);
@@ -1237,20 +1317,63 @@ class Neural_Net{
 	    }
 	 public  void Print_Outputs_Neurons() {
 		 	System.out.println("============");
-	System.out.println("Output After Training");
+	System.out.println("   Output");
 	System.out.println("============");
 		        	for(int j=0;j<Layers[Layers.length-1].neurons.length;j++) {
 			            System.out.println(Layers[Layers.length-1].neurons[j].value);
 		        }
 	 }
 	 
-	 
-	 //under dev
 	 public  void Save_Model(String Model_Name) {
 		 
-	 }
-	 public  void Load_Nodel(String Model_Name) {
-		 
+		 File model = new File(Model_Name);
+		 try (FileOutputStream fos = new FileOutputStream(model+".Brain");
+					BufferedOutputStream bos = new BufferedOutputStream(fos);
+					DataOutputStream dos = new DataOutputStream(bos)) {
+				dos.writeDouble(this.Learning_Rate);
+				dos.writeDouble(this.Max_Weight);
+				dos.writeDouble(this.Min_Weight);
+				dos.writeInt(this.Topology_Of_Neurons.length);
+				for(int i=0;i<Topology_Of_Neurons.length;i++) {
+					dos.writeInt(this.Topology_Of_Neurons[i]);
+				}
+			
+				
+				for(int layer=1;layer<this.Layers.length;layer++) {
+					for(int ners =0;ners<this.Layers[layer].neurons.length;ners++) {
+						
+						dos.writeDouble(this.Layers[layer].neurons[ners].bias);
+						dos.writeDouble(this.Layers[layer].neurons[ners].gradient);
+						dos.writeDouble(this.Layers[layer].neurons[ners].value);
+						
+						dos.writeInt(this.Layers[layer].neurons[ners].backprop_weights.length);
+						double backprop =  this.Layers[layer].neurons[ners].backprop_weights.length;
+						for(int m = 0 ; m <backprop;m++) {
+							dos.writeDouble(this.Layers[layer].neurons[ners].backprop_weights[m]);
+						}
+						
+						dos.writeInt(this.Layers[layer].neurons[ners].weights.length);
+						double weight = this.Layers[layer].neurons[ners].weights.length;
+						for(int m = 0 ; m <weight;m++) {
+							dos.writeDouble(this.Layers[layer].neurons[ners].weights[m]);
+						}
+
+
+
+						
+					}
+				}
+				
+				
+				
+				
+				
+				System.out.println("Your Model Was Successfully Saved As: [" + Model_Name +".Brain]");
+				dos.close();
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
 	 }
 	 
 }
