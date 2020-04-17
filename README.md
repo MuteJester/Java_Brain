@@ -18,10 +18,10 @@
   <p align="center">
     Simple Solution For Fast Programing Of Data Mining ,Deep Learning And Machine Learning Models As Well As CSV Management.
     <br />
-    <a href="https://github.com/MuteJester/Java_Brain"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/MuteJester/Java_Brain/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/MuteJester/Java_Brain">View Demo</a>
+    <a href="https://github.com/MuteJester/Java_Brain/wiki/A-Simple-Example-Of-Java-Brain-Usage">View Demo</a>
     ·
     <a href="https://github.com/MuteJester/Java_Brain/issues">Report Bug</a>
     ·
@@ -96,7 +96,7 @@ calculations supported soon there will a higher dimension support system.
   * Logistic Regression of binary variable as well as multivariable equations
   * Validation Of Logistic Regression - Confusion Matrix
   * K-Means calculation (up to 3-dimensional data variables)
-  * Fully Connected Neural Network contracting class accepting all forms of network topologies for dynamic use
+  * Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use
   * Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models
   * Some of the models have supported validation methods which will automatically compare machine guesses against actual values
   
