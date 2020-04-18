@@ -774,7 +774,7 @@ class Math_Toolbox{
 		}
 		return max;
 	}
-	public int random_int_in_range(int lower,int upper) {
+	public static int random_int_in_range(int lower,int upper) {
 		int rand = ThreadLocalRandom.current().nextInt(lower,upper);		
 		return rand;
 	}

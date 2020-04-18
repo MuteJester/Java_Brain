@@ -1118,14 +1118,20 @@ class Training_Data{
 		
 	}
 	
-	public void Load_Columns_As_Data(Java_Brain Data_Set,int[] Data_Column_Number,int Result_Column) {
+	public void Load_Columns_As_Data(Java_Brain Data_Set,int[] Data_Column_Number,int Result_Column[]) {
 		this.Data = new Data_Cartridge[Data_Set.Number_Of_Rows];
 		for(int i=0;i<Data.length;i++) {
 			double row_values[] = new  double[Data_Column_Number.length];
+			double result_values[] = new  double[Result_Column.length];
+
 			for(int j =0;j<Data_Column_Number.length;j++) {
 				row_values[j] = Double.parseDouble(Data_Set.CSV_Get_Value(i+1, Data_Column_Number[j]));
 			}
-			this.Data[i] = new Data_Cartridge(row_values,new double[] {Double.parseDouble(Data_Set.CSV_Get_Value(i+1, Result_Column))});
+			
+			for(int q =0;q<Result_Column.length;q++) {
+				result_values[q] = Double.parseDouble(Data_Set.CSV_Get_Value(i+1, Result_Column[q]));
+			}
+			this.Data[i] = new Data_Cartridge(row_values,result_values);
 			
 		}
 	}
@@ -1251,7 +1257,7 @@ class Neural_Net{
 	    }
 	
 	    // This function sums up all the gradient connecting a given neuron in a given layer
-	  public double sumGradient(int neuron_index,int layer_index) {
+	 public double sumGradient(int neuron_index,int layer_index) {
 		  double gradient_sum = 0;
 	    	Neuron_Layer current_layer = Layers[layer_index];
 	    	for(int i = 0; i < current_layer.neurons.length; i++) {
@@ -1272,6 +1278,7 @@ class Neural_Net{
 		// and for each of their weights
 		double output = Layers[out_index].neurons[i].value;
 		double target = training_Data.Expected_Output[i];
+
 		double derivative = output-target;
 		double delta = derivative*(output*(1-output));
 		Layers[out_index].neurons[i].gradient = delta;
@@ -1315,7 +1322,14 @@ class Neural_Net{
 	    		}
 	    	}
 	    }
-	 public  void Print_Outputs_Neurons() {
+	 public	 double[] Get_Output_Values() {
+		 double[] results = new double[this.Layers[Layers.length-1].neurons.length];
+		 for(int m = 0;m < this.Layers[Layers.length-1].neurons.length;m++) {
+			 results[m] = this.Layers[Layers.length-1].neurons[m].value;
+		 }
+		 return results;
+	 }
+	 public  void Print_Output_Neurons_Values() {
 		 	System.out.println("============");
 	System.out.println("   Output");
 	System.out.println("============");
@@ -1323,7 +1337,6 @@ class Neural_Net{
 			            System.out.println(Layers[Layers.length-1].neurons[j].value);
 		        }
 	 }
-	 
 	 public  void Save_Model(String Model_Name) {
 		 
 		 File model = new File(Model_Name);
@@ -1375,5 +1388,189 @@ class Neural_Net{
 				e.printStackTrace();
 			}
 	 }
-	 
+	 public  void Visualise_Neural_Network() {
+		Color_Palette CSET = new Color_Palette();
+		Math_Toolbox tlb = new Math_Toolbox();
+		Image VNET = new Image();
+		int max_layer_size = tlb.get_array_max(Topology_Of_Neurons);
+		int image_width;
+		if(max_layer_size > this.Layers.length) {
+			 image_width = (max_layer_size+1)*90 + 200;
+
+		}else {
+		 image_width = this.Layers.length*200 + 400;
+		}
+		
+		VNET.Load_Blank_Canvas(image_width, image_width, CSET.White_Smoke);
+		
+		
+		
+		double p = tlb.Remap(0, 0, this.Topology_Of_Neurons.length, 100, image_width);
+		double h = ((image_width-100)/(Topology_Of_Neurons[0]+1));
+		double growth= h;
+		
+		for(int j=0;j<Topology_Of_Neurons[0];j++) {		
+			
+			double p2 = tlb.Remap(0+1, 0, this.Topology_Of_Neurons.length, 100, image_width);
+			double h2 = ((image_width-100)/(Topology_Of_Neurons[0+1]+1));
+			double growth2= h2;
+			
+			for(int k=0;k<Topology_Of_Neurons[0+1];k++) {
+				VNET.Draw_Line((int)growth, (int)p, (int)growth2, (int)p2, CSET.Red);
+				VNET.Draw_Line((int)growth-1, (int)p-1, (int)growth2+1, (int)p2+1, CSET.Red);
+				VNET.Draw_Line((int)growth+1, (int)p+1, (int)growth2-1, (int)p2-1, CSET.Red);
+				VNET.Draw_Line((int)growth-1, (int)p+1, (int)growth2-1, (int)p2+1, CSET.Red);
+				VNET.Draw_Line((int)growth+1, (int)p-1, (int)growth2+1, (int)p2-1, CSET.Red);
+				VNET.Draw_Line((int)growth+1, (int)p-1, (int)growth2-1, (int)p2-1, CSET.Red);
+				VNET.Draw_Line((int)growth+1, (int)p-1, (int)growth2+1, (int)p2+1, CSET.Red);
+				VNET.Draw_Line((int)growth-1, (int)p+1, (int)growth2+1, (int)p2+1, CSET.Red);
+				VNET.Draw_Line((int)growth-1, (int)p+1, (int)growth2-1, (int)p2-1, CSET.Red);
+
+
+
+				growth2+= h2;
+				
+			}
+			
+			
+			growth+=h;
+
+		}
+		
+		
+		
+		
+		
+		for(int i =1;i<this.Topology_Of_Neurons.length-2;i+=2) {
+			 p = tlb.Remap(i, 0, this.Topology_Of_Neurons.length, 100, image_width);
+			 h = ((image_width-100)/(Topology_Of_Neurons[i]+1));
+			 growth= h;
+			
+		
+			
+			for(int j=0;j<Topology_Of_Neurons[i];j++) {				
+				double p2 = tlb.Remap(i+2, 0, this.Topology_Of_Neurons.length, 100, image_width);
+				double h2 = ((image_width-100)/(Topology_Of_Neurons[i+2]+1));
+				double growth2= h2;
+				
+				for(int k=0;k<Topology_Of_Neurons[i+2];k++) {
+					VNET.Draw_Line((int)growth, (int)p, (int)growth2, (int)p2, CSET.Red);
+					VNET.Draw_Line((int)growth-1, (int)p-1, (int)growth2+1, (int)p2+1, CSET.Red);
+					VNET.Draw_Line((int)growth+1, (int)p+1, (int)growth2-1, (int)p2-1, CSET.Red);
+					VNET.Draw_Line((int)growth-1, (int)p+1, (int)growth2-1, (int)p2+1, CSET.Red);
+					VNET.Draw_Line((int)growth+1, (int)p-1, (int)growth2+1, (int)p2-1, CSET.Red);
+					VNET.Draw_Line((int)growth+1, (int)p-1, (int)growth2-1, (int)p2-1, CSET.Red);
+					VNET.Draw_Line((int)growth+1, (int)p-1, (int)growth2+1, (int)p2+1, CSET.Red);
+					VNET.Draw_Line((int)growth-1, (int)p+1, (int)growth2+1, (int)p2+1, CSET.Red);
+					VNET.Draw_Line((int)growth-1, (int)p+1, (int)growth2-1, (int)p2-1, CSET.Red);
+
+
+
+					growth2+= h2;
+					
+				}
+				
+				
+				growth+=h;
+
+			}
+			
+		}
+		VNET.Update_Pixel_Matrix();
+		
+		
+		 p = tlb.Remap(0, 0, this.Layers.length, 100, image_width);
+		 h = ((image_width-100)/(Topology_Of_Neurons[0]+1));
+		 growth= h;
+		for(int j=0;j<Topology_Of_Neurons[0];j++) {
+			VNET.Draw_Circle((int)p, (int)growth, 37, CSET.Royal_Blue,"Fill");
+			VNET.Draw_Circle((int)p, (int)growth, 32, new Pixel(85,85,85),"Fill");
+
+			growth+=h;
+
+		}
+		
+		
+		for(int i =1;i<this.Topology_Of_Neurons.length;i+=2) {
+			 p = tlb.Remap(i, 0, this.Topology_Of_Neurons.length, 100, image_width);
+			 h = ((image_width-100)/(Topology_Of_Neurons[i]+1));
+			 growth= h;
+			for(int j=0;j<Topology_Of_Neurons[i];j++) {
+				VNET.Draw_Circle((int)p, (int)growth, 37, CSET.Royal_Blue,"Fill");
+				VNET.Draw_Circle((int)p, (int)growth, 32, new Pixel(85,85,85),"Fill");
+				growth+=h;
+
+			}
+			
+		}
+		VNET.Commint_Matrix_Changes();
+
+		
+		VNET.Set_Scale(650, 900);
+		VNET.Show_Image();
+	 }
+}
+
+
+class Q_Learner{
+	int States,Actions;
+	double Learning_Rate;
+	double Discount_Rate;
+	double Epsilon = 1.0;
+	Matrix Q_Table;
+	public Q_Learner(int Amount_Of_States,int Amount_Of_Actions,double Learning_Rate,double Discount_Rate) {
+		this.Learning_Rate=Learning_Rate;
+		this.Discount_Rate=Discount_Rate;
+		Q_Table = new Matrix(Amount_Of_States,Amount_Of_Actions);
+		for(int i=0;i<Amount_Of_States;i++) {
+			for(int j=0;j<Amount_Of_Actions;j++) {
+				Q_Table.Matrix_Body[i][j] = Math_Toolbox.random_double_in_range(-2, 1);
+			}
+		}
+		this.Actions=Amount_Of_Actions;
+		this.States=Amount_Of_States;
+		
+	}
+	public int Get_Action(int State) {
+		double max = Double.MIN_VALUE;
+		int Greedy_pos =0,Random_Pos=Math_Toolbox.random_int_in_range(0, Actions);
+		for(int i=0;i<Q_Table.Cols;i++) {
+			if(Q_Table.Matrix_Body[State][i] >= max) {
+				max = Q_Table.Matrix_Body[State][i];
+				Greedy_pos =i;
+			}
+		}
+		 
+		if(Math_Toolbox.random_double_in_range(0, 1.0) < this.Epsilon) {
+			return Random_Pos;
+		}else {
+			return Greedy_pos;
+		}
+		
+	}
+	public void Train(int state,int action ,int next_state,double reward,boolean done) {
+		
+		double[] next_states = this.Q_Table.Matrix_Body[ next_state];
+		
+		if(done == true) {
+			for(int i=0;i<next_states.length;i++) {
+				next_states[i] =0;
+			}
+		}
+		double max = Double.MIN_VALUE;
+		for(int i=0;i<Q_Table.Cols;i++) {
+			if(next_states[i] >= max) {
+				max = next_states[i];
+			}
+		}
+		double target_q = reward + this.Discount_Rate*max;
+		double update_q = target_q - this.Q_Table.Matrix_Body[state][action];
+		 this.Q_Table.Matrix_Body[state][action] += this.Learning_Rate*update_q;
+		
+		
+		if(done == true) {
+			this.Epsilon*=0.99;
+		}
+	}
+
 }
