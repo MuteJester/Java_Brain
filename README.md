@@ -88,14 +88,14 @@ the methods return the weights resulting after computing the optimal state using
 #### Ploting 2D K-Means Algorithm
 
 <img src="Examples/kmeans-k=2.png" alt="Logo" width="600" height="600">
-Java Brain Offers you a method which is a part of the Neural_Net class which allows you to visualize you neural network topology inorder for you to validate that the topology you have specified in the Neural_Net class constructor is indeed the topology created and set.  
-
+Java Brain Offers a fast and efficenet K-means calculation aglorithm although currently only up to 3 dimensional K - Means
+calculations supported soon there will a higher dimension support system.
 
 #### Ploting User Designed Fully Connected Neural Network Topology
 
 <img src="Examples/FCNN-topology.png" alt="Logo" width="600" height="600">
-Java Brain Offers a fast and efficenet K-means calculation aglorithm although currently only up to 3 dimensional K - Means
-calculations supported soon there will a higher dimension support system.
+
+Java Brain Offers you a method which is a part of the Neural_Net class which allows you to visualize you neural network topology inorder for you to validate that the topology you have specified in the Neural_Net class constructor is indeed the topology created and set.  
 
 
 
