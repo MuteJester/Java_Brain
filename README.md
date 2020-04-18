@@ -68,14 +68,14 @@ Here's Why Java Brain :brain: :
 ## Usage
 
 
-__Ploting Linear Regression Algorithm__
+#### Ploting Linear Regression Algorithm
 
 <img src="Examples/Linear_Regression_data.png" alt="Logo" width="600" height="600">
 Java Brain Offers Binary Linear Regression As Well As Multivariable Linear Regression
 in the following exmaple a fast method for immediate ploting of a linear regression model.
 
 
-__Ploting Logistic Regression Algorithm__
+#### Ploting Logistic Regression Algorithm
 
 <img src="Examples/Logistic_regression_shoots.png" alt="Logo" width="600" height="600">
 Java Brain Offers Binary Logistic Regression As Well As Multivariable Logistic Regression
@@ -85,13 +85,13 @@ the methods return the weights resulting after computing the optimal state using
 
 
 
-__Ploting 2D K-Means Algorithm__
+#### Ploting 2D K-Means Algorithm
 
 <img src="Examples/kmeans-k=2.png" alt="Logo" width="600" height="600">
 Java Brain Offers you a method which is a part of the Neural_Net class which allows you to visualize you neural network topology inorder for you to validate that the topology you have specified in the Neural_Net class constructor is indeed the topology created and set.  
 
 
-__Ploting User Designed Fully Connected Neural Network Topology__
+#### Ploting User Designed Fully Connected Neural Network Topology
 
 <img src="Examples/FCNN-topology.png" alt="Logo" width="600" height="600">
 Java Brain Offers a fast and efficenet K-means calculation aglorithm although currently only up to 3 dimensional K - Means
