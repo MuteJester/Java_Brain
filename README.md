@@ -67,14 +67,15 @@ Here's Why Java Brain :brain: :
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-_Ploting Linear Regression Algorithm_
+
+#### Ploting Linear Regression Algorithm
 
 <img src="Examples/Linear_Regression_data.png" alt="Logo" width="600" height="600">
 Java Brain Offers Binary Linear Regression As Well As Multivariable Linear Regression
 in the following exmaple a fast method for immediate ploting of a linear regression model.
 
 
-_Ploting Logistic Regression Algorithm_
+#### Ploting Logistic Regression Algorithm
 
 <img src="Examples/Logistic_regression_shoots.png" alt="Logo" width="600" height="600">
 Java Brain Offers Binary Logistic Regression As Well As Multivariable Logistic Regression
@@ -83,11 +84,19 @@ the logistic regression functionality, as well as the linear regression, can be 
 the methods return the weights resulting after computing the optimal state using gradient descent;
 
 
-_Ploting 2D K-Means Algorithm_
+
+#### Ploting 2D K-Means Algorithm
 
 <img src="Examples/kmeans-k=2.png" alt="Logo" width="600" height="600">
 Java Brain Offers a fast and efficenet K-means calculation aglorithm although currently only up to 3 dimensional K - Means
 calculations supported soon there will a higher dimension support system.
+
+#### Ploting User Designed Fully Connected Neural Network Topology
+
+<img src="Examples/FCNN-topology.png" alt="Logo" width="600" height="600">
+
+Java Brain Offers you a method which is a part of the Neural_Net class which allows you to visualize you neural network topology inorder for you to validate that the topology you have specified in the Neural_Net class constructor is indeed the topology created and set.  
+
 
 
 ### Currently Supported Data Mining / Machine Learning / Deep Learning, Algorithms
@@ -97,8 +106,10 @@ calculations supported soon there will a higher dimension support system.
   * Validation Of Logistic Regression - Confusion Matrix
   * K-Means calculation (up to 3-dimensional data variables)
   * Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use
+  * Q Learning "Custom-fit" Class applicable for any use 
   * Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models
   * Some of the models have supported validation methods which will automatically compare machine guesses against actual values
+  
   
   ### Currently Supported CSV Handling Functionality
   
