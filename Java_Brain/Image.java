@@ -403,7 +403,7 @@ class SIPL_Window extends JFrame{
 	    label.setIcon((Icon) new ImageIcon(IMG));
 	    this.getContentPane().add(label,BorderLayout.CENTER);
 	    //this.setLocationRelativeTo(null);
-	    this.setSize(IMG.getWidth(), IMG.getHeight());
+	    this.setSize(IMG.getWidth()+50, IMG.getHeight()+50);
 		this.setVisible(true);
 		this.setLayout(null);
 		this.isopen = true;
@@ -828,6 +828,15 @@ class Math_Toolbox{
     	}
     	return sum;
     }
+
+    public static double Rectified(double x) {
+    	if(x >= 0) {
+    		return x;
+    	}else {
+    		return 0;
+    	}
+    }
+
 }
 class Point{
 	
@@ -1055,6 +1064,7 @@ class LabPixel{
 		this.B=b;
 
 	}
+
 	public LabPixel(int l,int a,int b,int i,int j) {
 		this.L=l;
 		this.A=a;

@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 
 
 
+
 public class Java_Brain {
 	public static Math_Toolbox tlb = new Math_Toolbox();
 	public static Color_Palette CSET = new Color_Palette();
@@ -107,17 +108,6 @@ public class Java_Brain {
 
 		csvWriter.flush();
 		csvWriter.close();
-	}
-	public double Get_Max_Value_In_Column(int Column_Number) {
-		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
-		double max = Double.MIN_VALUE;
-		for(int i =0;i<this.Number_Of_Rows;i++) {
-			double cur_val = Double.parseDouble(col.get(i));
-			if(max < cur_val) {
-				max = cur_val;
-			}
-		}
-		return max;
 	}
 	public void Print_CSV_Data() {
 		Iterator<String> itr;
@@ -257,6 +247,7 @@ public class Java_Brain {
 		}
 		return res;
 	}
+
 	public void Add_Column(String Column_Name) {
 		this.Number_Of_Columns++;
 		this.Column_Names.add(Column_Name);
@@ -336,7 +327,25 @@ public class Java_Brain {
 		}
 		
 	}
-	
+	public static Java_Brain Matrix_To_CSV(Matrix source) {
+		Java_Brain output = new Java_Brain();
+		int w = source.Cols;
+		int h = source.Rows;
+		for(int i =0;i<w;i++) {
+			output.Column_Names.add(" ");
+		}
+		output.Number_Of_Columns=w;
+		ArrayList<String> row = new ArrayList<String>();
+		for(int i =0;i<h;i++) {
+			for(int j=0;j<w;j++) {
+				row.add(String.format("%f", source.Matrix_Body[i][j]));
+			}
+			output.Add_Row(row);
+			row = new ArrayList<String>();
+		}
+		
+		return output;
+	}
 	//
 	
 	//Math Utilities
@@ -406,26 +415,55 @@ public class Java_Brain {
 		double Deviation = Get_Column_Standard_Deviation(Column_Number);
 		return (Deviation)*(Deviation);
 	}
-	
+	public double Get_Max_Value_In_Column(int Column_Number) {
+		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
+		double max = Double.MIN_VALUE;
+		for(int i =0;i<this.Number_Of_Rows;i++) {
+			double cur_val = Double.parseDouble(col.get(i));
+			if(max < cur_val) {
+				max = cur_val;
+			}
+		}
+		return max;
+	}
+	public double Get_Min_Value_In_Column(int Column_Number) {
+		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
+		double min = Double.MAX_VALUE;
+		for(int i =0;i<this.Number_Of_Rows;i++) {
+			double cur_val = Double.parseDouble(col.get(i));
+			if(min > cur_val) {
+				min = cur_val;
+			}
+		}
+		return min;
+	}
+
 	//Algorithms
 	public double Squared_Point_Distance(Point first, Point second) {
 		return (first.x - second.x)*(first.x - second.x) + (first.y - second.y)*(first.y - second.y) + (first.z - second.z)*(first.z - second.z);
 	}
-	public Point Get_Linear_Regression_Equation(ArrayList<Point> Data) {
-		double a,bx;
-		double sum_xy=0,sum_xsquared=0,sum_ysquared=0,sum_x=0,sum_y=0;
-		Point t;
-		for(int i = 0 ; i<Data.size();i++) {
-			t = Data.get(i);
-			sum_x += t.x;
-			sum_y += t.y;
-			sum_xy += t.y*t.x;
-			sum_xsquared += t.x*t.x;
-			sum_ysquared += t.y*t.y;
+	public Matrix Linear_Regression_Static_Formula(int X_Values_Column_Number ,int Y_Values_Column_Number) {
+		ArrayList<String> X_Values = this.Get_Specific_Column(X_Values_Column_Number);
+		ArrayList<String> Y_Values = this.Get_Specific_Column(Y_Values_Column_Number);
+
+		if(X_Values.size() != Y_Values.size()) {
+			System.out.println("Error Both Value Arrays Must Have The Same Amount Of Elements");
+			return null;
 		}
-		a = (sum_y*sum_xsquared - sum_x*sum_xy)/(Data.size()*sum_xsquared - sum_x*sum_x);
-		bx = (Data.size() * sum_xy - sum_x*sum_y)/(Data.size()*sum_xsquared - sum_x*sum_x);
-		return new Point(a,bx,0); 
+		double sum_xy=0,sum_xsquared=0,sum_ysquared=0,sum_x=0,sum_y=0;
+		for(int i = 0 ; i<X_Values.size();i++) {
+			double tx=Double.parseDouble(X_Values.get(i)),ty=Double.parseDouble(Y_Values.get(i));
+			sum_x += tx;
+			sum_y += ty;
+			sum_xy += ty*tx;
+			sum_xsquared += tx*tx;
+			sum_ysquared += ty*ty;
+		}
+
+		Matrix res = new Matrix(2,1);
+		res.Matrix_Body[0][0] = (sum_y*sum_xsquared - sum_x*sum_xy)/(X_Values.size()*sum_xsquared - sum_x*sum_x);
+		res.Matrix_Body[1][0] = (X_Values.size() * sum_xy - sum_x*sum_y)/(X_Values.size()*sum_xsquared - sum_x*sum_x);
+		return res;
 		
 	}
 	public ArrayList<Point> K_Means(ArrayList<Point> data, int k, int number_of_iterations) {
@@ -523,21 +561,23 @@ public class Java_Brain {
 		totalError *= (double)1/(this.Number_Of_Rows);
 		return totalError;
 	}
-	private Point Step_Gradient(double Current_B,double Current_M,double Learning_Rate ,ArrayList<String> X_val,ArrayList<String> Y_val) {
+	private Matrix Step_Gradient(double Current_B,double Current_M,double Learning_Rate ,int X_COL,int Y_COL) {
+		ArrayList<String> X_val = this.Get_Specific_Column(X_COL);
+		ArrayList<String> Y_val = this.Get_Specific_Column(Y_COL);
+
 		double b_gradient = 0;
 		double m_gradient = 0;
 		double x , y;
-		double new_b,new_m;
 		for(int i =0;i<this.Number_Of_Rows;i++) {
 			x = Double.parseDouble(X_val.get(i));
 			y = Double.parseDouble(Y_val.get(i));
 			m_gradient += ((double)2/Number_Of_Rows)*-x*(y - (Current_M * x + Current_B));
 			b_gradient += ((double)2/Number_Of_Rows)*-(y - (Current_M * x + Current_B));
 		}
-		new_b = Current_B - (Learning_Rate * b_gradient);
-		new_m = Current_M - (Learning_Rate * m_gradient);
-		
-		return new Point(new_m,new_b,0);
+		Matrix result = new Matrix(2,1);
+		result.Matrix_Body[0][0] = Current_B - (Learning_Rate * b_gradient);
+		result.Matrix_Body[1][0] =Current_M - (Learning_Rate * m_gradient);
+		return result;
 		
 	}
 	public double Get_MSE(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
@@ -564,7 +604,7 @@ public class Java_Brain {
 		es/=Y.size();
 		return es;
 	}
-	public double Get_Pearson_Correlation_Coefficient(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
+    public  double Get_Pearson_Correlation_Coefficient(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		double r =0;
 		double sigma_xy=0,sigma_x=0,sigma_y=0,sigma_xs=0,sigma_ys=0;
 		ArrayList<Double>y,y_h;
@@ -595,16 +635,16 @@ public class Java_Brain {
 		return ARS;
 		
 	}
-	public Matrix Logistic_Regression_Confusion_Matrix(Matrix LR_Weights,int Binary_Column,ArrayList<Integer> Sampled_Rows,double Decision_Boundary ) {		
+	public Matrix Confusion_Matrix(Matrix Regression_Weights,int Binary_Column,int[] Sampled_Rows,double Decision_Boundary ) {		
 		Matrix CM = new Matrix(2,2);
 		double TruePositive=0;
 		double TrueNegative=0;
 		double FalsePositive=0;
 		double FalseNegative=0;
 		for(int i =1;i<=this.Number_Of_Rows;i++) {
-			double pred_s = LR_Weights.Matrix_Body[0][0];
-			for(int j=1;j<=Sampled_Rows.size();j++) {
-				pred_s += LR_Weights.Matrix_Body[j][0] *Double.parseDouble(this.CSV_Get_Value(i,Sampled_Rows.get(j-1)));
+			double pred_s = Regression_Weights.Matrix_Body[0][0];
+			for(int j=1;j<=Sampled_Rows.length;j++) {
+				pred_s += Regression_Weights.Matrix_Body[j][0] *Double.parseDouble(this.CSV_Get_Value(i,Sampled_Rows[j-1]));
 			}
 			pred_s = this.Sigmoid(pred_s);
 			double actual = Double.parseDouble(this.CSV_Get_Value(i, Binary_Column));
@@ -633,11 +673,11 @@ public class Java_Brain {
 		
 		CM.Matrix_Body[0][0] = TruePositive;
 		CM.Matrix_Body[1][0] = FalsePositive;
-		CM.Matrix_Body[0][1] =FalsePositive;
+		CM.Matrix_Body[0][1] =FalseNegative;
 		CM.Matrix_Body[1][1] =TrueNegative; 
 		return CM;
 	}
-	public void Print_List_Of_Rates(Matrix Confusion_Matrix,int Number_Sampled) {
+	public void Print_Confusion_Matrix_List_Of_Rates(Matrix Confusion_Matrix,int Number_Sampled) {
 		double TP = Confusion_Matrix.Matrix_Body[0][0];
 		double FP = Confusion_Matrix.Matrix_Body[1][0];
 		double TN = Confusion_Matrix.Matrix_Body[1][1];
@@ -649,22 +689,32 @@ public class Java_Brain {
 		System.out.println("Recall : [ " +((TP)/TP+FN)+" ]");
 		
 	}
-	public void Validate_Logistic_Regression(Matrix LR_Weights,int Binary_Column,ArrayList<Integer> Sampled_Rows) {		
+	public void Validate_Logistic_Regression(Matrix LR_Weights,int Binary_Column,int[] Sampled_Rows) {		
 		for(int i =1;i<=this.Number_Of_Rows;i++) {
 			double pred_s = LR_Weights.Matrix_Body[0][0];
-			for(int j=1;j<=Sampled_Rows.size();j++) {
-				pred_s += LR_Weights.Matrix_Body[j][0] *Double.parseDouble(this.CSV_Get_Value(i,Sampled_Rows.get(j-1)));
+			for(int j=1;j<=Sampled_Rows.length;j++) {
+				pred_s += LR_Weights.Matrix_Body[j][0] *Double.parseDouble(this.CSV_Get_Value(i,Sampled_Rows[j-1]));
 			}
 			pred_s = this.Sigmoid(pred_s);
+			
+			System.out.print("\n====================\n");
+			System.out.print("Values: ");
+			for(int z =0;z<Sampled_Rows.length;z++) {
+				System.out.print(this.CSV_Get_Value(i,Sampled_Rows[z]) + " ");
 
-			System.out.println("Prediction: " + pred_s + " Reality " + this.CSV_Get_Value(i, Binary_Column));
+			}
+			System.out.print("\n====================\n");
+
+			System.out.println("Prediction: [" + pred_s + "] Actual: [" + this.CSV_Get_Value(i, Binary_Column)+"]");
+			System.out.print("\n---------------------\n");
+
 		}
-	
+
 			
 	}
 
-	private Matrix Step_Gradient(Matrix Current_Weights,double Learning_Rate ,ArrayList<Integer> Columns_Of_Sampels,ArrayList<String> True_Y) {
-		int nof = Columns_Of_Sampels.size()+1;
+	private Matrix Step_Gradient(Matrix Current_Weights,double Learning_Rate ,int[] Columns_Of_Sampels,ArrayList<String> True_Y) {
+		int nof = Columns_Of_Sampels.length+1;
 		Matrix Gradients = new Matrix(nof,1);
 		Matrix Teta = new Matrix(Current_Weights);
 		Matrix Values = new Matrix(nof,1);
@@ -676,7 +726,7 @@ public class Java_Brain {
 			//h0  guess
 			Values.Matrix_Body[0][0]=1;
 			for(int j =1;j<nof;j++) {
-				Values.Matrix_Body[j][0] = Double.parseDouble(this.CSV_Get_Value(i, Columns_Of_Sampels.get(j-1)));
+				Values.Matrix_Body[j][0] = Double.parseDouble(this.CSV_Get_Value(i, Columns_Of_Sampels[j-1]));
 			}			
 			h0=Teta.Dot_Product(Values);
 						
@@ -699,31 +749,30 @@ public class Java_Brain {
 		return Prediction;
 		
 	}
-	public Matrix Linear_Regression_Multivariable(ArrayList<Integer> Columns_Of_Sampels,ArrayList<String> True_Y,double Leaning_Rate,int number_of_iterations) {
+	public Matrix Linear_Regression_Gradient_Descent(int[] Sample_Columns,ArrayList<String> True_Y,double Leaning_Rate,int number_of_iterations) {
 		//y = mx + b - for slope calculation
-		Matrix LE = new Matrix(Columns_Of_Sampels.size()+1,1);
+		Matrix LE = new Matrix(Sample_Columns.length+1,1);
 		for(int i = 0;i<number_of_iterations;i++) {
-			LE = this.Step_Gradient(LE , Leaning_Rate, Columns_Of_Sampels, True_Y);
+			LE = this.Step_Gradient(LE , Leaning_Rate, Sample_Columns, True_Y);
 		}
 		return LE;
 		
 	}
-
-	public Point Linear_Regression_Gradient_Descent(ArrayList<String> X_values,ArrayList<String> Y_values,double Leaning_Rate,int number_of_iterations) {
-		//y = mx + b - for slope calculation
-		Point LE = new Point();
+	public Matrix Linear_Regression_Gradient_Descent(int X_Values_Column_Number,int Y_Values_Column_Number,double Leaning_Rate,int number_of_iterations) {
+		
+		Matrix LE = new Matrix(2,1);
 		for(int i = 0;i<number_of_iterations;i++) {
-			LE = this.Step_Gradient(LE.y, LE.x, Leaning_Rate, X_values, Y_values);
+			LE = this.Step_Gradient(LE.Matrix_Body[0][0], LE.Matrix_Body[1][0], Leaning_Rate, X_Values_Column_Number, Y_Values_Column_Number);
 		}
-		LE.z = Compute_Error_For_Given_Points(X_values,Y_values,LE.y,LE.x);
+		//LE.z = Compute_Error_For_Given_Points(X_values,Y_values,LE.y,LE.x);
 
 		return LE;
 		
 	}
-	public Point Get_Logistic_Regression(ArrayList<String> Values,ArrayList<String> Binary_Category,int number_of_iterations,double learning_rate) {
-		ArrayList<Point> vals = this.Column_To_Point_List(Values, Binary_Category);
-		SPlot plt = new SPlot();
+	/*public Matrix Logistic_Regression(int Values_Column_Number,int Binary_Category_Column_Number,int number_of_iterations,double learning_rate) {
 		double B0 =0,B1=0;
+		ArrayList<String> Values = this.Get_Specific_Column(Values_Column_Number);
+		ArrayList<String> Binary_Category = this.Get_Specific_Column(Binary_Category_Column_Number);
 		ArrayList<Double> Predictions = new ArrayList<Double>();
 		double Cost =0,Lowest_Cost=Double.MAX_VALUE;
 		for(int i = 0;i<number_of_iterations;i++) {
@@ -763,12 +812,18 @@ public class Java_Brain {
 		}
 		
 		
-
-		return new Point(B1,B0,0);
+		Matrix Result = new Matrix(2,1);
+		Result.Matrix_Body[0][0] = B0;
+		Result.Matrix_Body[0][0] = B1;
+		return Result;
 		
-	}
-	public Matrix Get_Multi_Value_Logistic_Regression(ArrayList<ArrayList<String>> Values,ArrayList<String> Binary_Category,int number_of_iterations,double learning_rate) {
-		
+	}*/
+	public Matrix Logistic_Regression(int Value_Column_Numbers[],int Binary_Category_Number,int number_of_iterations,double learning_rate) {
+		ArrayList<ArrayList<String>> Values = new ArrayList<ArrayList<String>>();
+		for(int i=0;i<Value_Column_Numbers.length;i++) {
+			Values.add(this.Get_Specific_Column(Value_Column_Numbers[i]));
+		}
+		ArrayList<String> Binary_Category = this.Get_Specific_Column(Binary_Category_Number);
 		int number_of_features =Values.size()+1;
 		int number_of_sampels = Values.get(0).size();
 		Matrix Weights = new Matrix(number_of_features,1);
@@ -845,10 +900,11 @@ public class Java_Brain {
 	}
 	
 	//Visual
-	public void Plot_Linear_Regression(ArrayList<Point> Data,String X_Name,String Y_Name) {
-		Point LE = Get_Linear_Regression_Equation(Data) ;
+	public void Plot_Linear_Regression(int X_Values_Column_Number,int Y_Values_Column_Number,String X_Name,String Y_Name) {
+		Matrix LE = this.Linear_Regression_Static_Formula(X_Values_Column_Number, Y_Values_Column_Number);
 		Math_Toolbox tlb = new Math_Toolbox();
 		SPlot plt = new SPlot();
+		ArrayList<Point> Data = this.Column_To_Point_List(this.Get_Specific_Column(X_Values_Column_Number), this.Get_Specific_Column(Y_Values_Column_Number));
 		Image data_plot = plt.Get_Scatter_Plot(Data, X_Name, Y_Name);
 		double Max_X = Double.MIN_VALUE,Max_Y = Double.MIN_VALUE;
 		for(int i = 0 ;i<Data.size();i++) {
@@ -866,7 +922,7 @@ public class Java_Brain {
 		double y_val;
 		int draw_i = 5000;
 		for(double i =0 ;i<=Max_X;i+=0.01) {
-			y_val = LE.y * i + LE.x;
+			y_val = LE.Matrix_Body[1][0] * i + LE.Matrix_Body[0][0];
 			tx = tlb.Remap((float)i, 0, (float)Max_X, 105, 720);
 			ty = tlb.Remap((float)y_val, (float)0 , (float)(Max_Y) ,575, 80);
 			data_plot.Draw_Circle((int)tx, (int)ty, 1, CSET.Red,"Fill");
@@ -881,8 +937,11 @@ public class Java_Brain {
     public void Plot_Scatter_Plot(ArrayList<Point> Data,String X_Name,String Y_Name) {
     	plot.Show_Scatter_Plot(Data, X_Name, Y_Name);
     }
-    public void Plot_Gradient_Descent(ArrayList<String> X_values,ArrayList<String> Y_values,double Leaning_Rate,int number_of_iterations) {
-		ArrayList<Point> points = new ArrayList<Point>();
+    public void Plot_Gradient_Descent(int X_values_column,int Y_values_column,double Leaning_Rate,int number_of_iterations) {
+		ArrayList<String>  X_values = this.Get_Specific_Column(X_values_column);
+		ArrayList<String>  Y_values = this.Get_Specific_Column(Y_values_column);
+
+    	ArrayList<Point> points = new ArrayList<Point>();
 		for(int i = 0 ;i<Number_Of_Rows;i++) {
 			points.add(new Point(Double.parseDouble(X_values.get(i)),Double.parseDouble(Y_values.get(i)),0));
 		}
@@ -894,11 +953,11 @@ public class Java_Brain {
     	SIPL_Window sw = new SIPL_Window(plot.IMG);
 		sw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		int z =0;
-		Point LE = new Point();
+		Matrix LE = new Matrix(2,1);
 		
 
-    	Point convergence_test =this.Linear_Regression_Gradient_Descent(X_values, Y_values, Leaning_Rate, number_of_iterations);
-		if(convergence_test.x == Double.NaN || convergence_test.y == Double.NaN) {
+    	Matrix convergence_test =this.Linear_Regression_Gradient_Descent(new int[] {X_values_column}, Y_values, Leaning_Rate, number_of_iterations);
+		if(convergence_test.Matrix_Body[1][0] == Double.NaN || convergence_test.Matrix_Body[0][0] == Double.NaN) {
 			System.out.println("Cannot Converge,Try To Adjust The Learning Rate");
 			return;
 		}
@@ -920,11 +979,11 @@ public class Java_Brain {
 		Image nolines = new Image(plot);
 		while(z<number_of_iterations) {
 			//calculating gradient decent and getting the equation
-			LE = this.Step_Gradient(LE.y, LE.x, Leaning_Rate, X_values, Y_values);
+			LE = this.Step_Gradient(LE.Matrix_Body[0][0], LE.Matrix_Body[1][0], Leaning_Rate, X_values_column, Y_values_column);
 			
 			//line drawing and mapping
 			for(double p =0 ;p<=Max_X;p+=0.01) {
-				y_val = LE.x * p + LE.y;
+				y_val = LE.Matrix_Body[0][0] * p + LE.Matrix_Body[1][0];
 				tx = tlb.Remap((float)p, 0, (float)Max_X, 105, 720);
 				ty = tlb.Remap((float)y_val, (float)0 , (float)(Max_Y) ,565, 80);
 				//System.out.println("TX: " + tx +" TY: "+ ty + " Y_VAL : " + y_val + "\nLE.x:  " + LE.x);
@@ -1027,6 +1086,95 @@ public class Java_Brain {
     
 }
 
+class Image_Tools{
+	public static Java_Brain Image_Pixels_To_CSV(char Channel,Image source) {
+		Java_Brain output = new Java_Brain();
+		for(int i=0;i<source.Image_Width;i++) {
+			output.Column_Names.add("1x"+i);
+		}
+		output.Number_Of_Columns=source.Image_Width;
+		ArrayList<String> Row = new ArrayList<String>();
+		for(int i=0;i<source.Image_Height;i++) {
+			for(int j=0;j<source.Image_Width;j++) {
+				switch(Channel) {
+				case 'R':
+					Row.add(String.format("%d", source.Pixel_Matrix[i][j].r));
+					break;
+				case 'G':
+					Row.add(String.format("%d", source.Pixel_Matrix[i][j].g));
+					break;
+				case 'B':
+					Row.add(String.format("%d", source.Pixel_Matrix[i][j].b));
+					break;
+				}
+			}
+			output.Add_Row(Row);
+			Row = new ArrayList<String>();
+		}
+		
+		
+		
+		return output;
+		
+	}
+	public static LabPixel[][] Get_Lab_Matrix(Image source){
+		LabPixel[][] lab_mat = new LabPixel[source.Image_Height][source.Image_Width];
+		
+		for(int i=0;i<source.Image_Height;i++) {
+			for(int j =0 ; j <source.Image_Width;j++) {
+				lab_mat[i][j] = new LabPixel();
+				lab_mat[i][j].RGB_to_LAB(source.Pixel_Matrix[i][j]);
+			}
+		}
+		
+		return lab_mat;
+	}
+	public static Java_Brain Lab_Matrix_To_Csv(char Channel,LabPixel[][] lab_matrix) {
+		int w = lab_matrix[0].length;
+		int h = lab_matrix.length;
+		Java_Brain output = new Java_Brain();
+		for(int i=0;i<w;i++) {
+			output.Column_Names.add(String.format("0x%d",i ));
+		}
+		
+		output.Number_Of_Columns=w;
+		ArrayList<String> Row = new ArrayList<String>();
+		for(int i=0;i<h;i++) {
+			for(int j=0;j<w;j++) {
+				switch(Channel) {
+				case 'L':
+					Row.add(String.format("%.5f", lab_matrix[i][j].L));
+					break;
+				case 'A':
+					Row.add(String.format("%.5f", lab_matrix[i][j].A));
+					break;
+				case 'B':
+					Row.add(String.format("%.5f",lab_matrix[i][j].B));
+					break;
+				}
+			}
+			output.Add_Row(Row);
+			Row = new ArrayList<String>();
+		}
+		
+		return output;
+	}
+	public static Image Lab_Matrix_To_RGB_Image(LabPixel lab_matrix[][]) {
+		Image output = new Image();
+		int w = lab_matrix[0].length;
+		int h = lab_matrix.length;
+		output.Load_Blank_Canvas(h, w, new Pixel(0,0,0));
+		for(int i=0;i<h;i++) {
+			for(int j = 0; j<w;j++) {
+				output.Pixel_Matrix[i][j].LAB_to_RGB(lab_matrix[i][j]);
+				output.Pixel_Matrix[i][j].Clamp_Outliers();
+			}
+		}
+		output.Commint_Matrix_Changes();
+		return output;
+	}
+
+}
 
 
 
@@ -1044,11 +1192,12 @@ class Neuron{
 	static double maxWeightValue;
 	
 	  // Constructor for the hidden / output neurons
-    public Neuron(double[] weights, double bias){
+    public Neuron(double[] weights, double bias,double value){
         this.weights = weights;
         this.bias = bias;
         this.backprop_weights = this.weights;
         this.gradient = 0;
+        this.value=value;
     }
     
     // Constructor for the input neurons
@@ -1086,7 +1235,7 @@ class Neuron_Layer{
 			for(int j = 0; j < Neurons_Connections; j++) {
 				weights[j] = Math_Toolbox.random_double_in_range(Neuron.minWeightValue, Neuron.maxWeightValue);
 			}
-			neurons[i] = new Neuron(weights,Math_Toolbox.random_double_in_range(0, 1));
+			neurons[i] = new Neuron(weights,1,Math_Toolbox.random_double_in_range(Neuron.minWeightValue, Neuron.maxWeightValue));
 		}
 	}
 	
@@ -1150,6 +1299,9 @@ class Training_Data{
 class Neural_Net{
 	Neuron_Layer[] Layers;
 	Training_Data Training_Data;
+	boolean Sigmoid = true;
+	boolean Tanh = false;
+	boolean Relu = false;
 	//for model constructing and reconstructing 
 	int[] Topology_Of_Neurons;
 	double Learning_Rate;
@@ -1239,7 +1391,6 @@ class Neural_Net{
 		}
 	
 	};
-
 	public void Forward_Data(double[] inputs) {
 	    	// First bring the inputs into the input layer layers[0]
 	    	Layers[0] = new Neuron_Layer(inputs);
@@ -1250,14 +1401,24 @@ class Neural_Net{
 	        		for(int k = 0; k < Layers[i-1].neurons.length; k++) {
 	        			sum += Layers[i-1].neurons[k].value*Layers[i].neurons[j].weights[k];
 	        		}
-	        		//sum += layers[i].neurons[j].bias; // add in the bias 
-	        		Layers[i].neurons[j].value = Math_Toolbox.Sigmoid(sum);
+	        		sum += Layers[i].neurons[j].bias; // add in the bias 
+	        		
+	        		if(Sigmoid == true) {
+		        		Layers[i].neurons[j].value = Math_Toolbox.Sigmoid(sum);
+	        		}else if(Tanh == true) {
+		        		Layers[i].neurons[j].value = Math.tanh(sum);
+
+	        		}else if(Relu==true) {
+	        			Layers[i].neurons[j].value  = Math_Toolbox.Rectified(sum);
+	        		}else {
+	        			System.out.println("No Activaition Function Selected");
+	        		}
 	        	}
 	        } 	
 	    }
 	
 	    // This function sums up all the gradient connecting a given neuron in a given layer
-	 public double sumGradient(int neuron_index,int layer_index) {
+	public double sumGradient(int neuron_index,int layer_index) {
 		  double gradient_sum = 0;
 	    	Neuron_Layer current_layer = Layers[layer_index];
 	    	for(int i = 0; i < current_layer.neurons.length; i++) {
@@ -1266,12 +1427,16 @@ class Neural_Net{
 	    	}
 	    	return gradient_sum;
 	    }
+	
 	 
-	 public  void Back_Propagate(Data_Cartridge training_Data) {
+	 
+    public  void Back_Propagate(Data_Cartridge training_Data) {
 	    	
 	    	int number_layers = Layers.length;
 	    	int out_index = number_layers-1;
-	    	
+			double derivative = 0;
+			double delta = 0;
+
 	    	// Update the output layers 
 	// For each output
 	for(int i = 0; i < Layers[out_index].neurons.length; i++) {
@@ -1279,8 +1444,24 @@ class Neural_Net{
 		double output = Layers[out_index].neurons[i].value;
 		double target = training_Data.Expected_Output[i];
 
-		double derivative = output-target;
-		double delta = derivative*(output*(1-output));
+		
+		
+		if(Sigmoid == true) {
+			derivative = (output-target);
+			delta = derivative*(output*(1-output));
+		}else if(Tanh == true) {
+			derivative = (output-target);
+			 delta = derivative*(1 - output*output);
+		}else if(Relu==true) {
+			if(output >=0) {
+				delta = (output-target);
+			}else {
+				delta =(output-target)*0.01;
+			}
+		}
+			 
+
+	
 		Layers[out_index].neurons[i].gradient = delta;
 		for(int j = 0; j < Layers[out_index].neurons[i].weights.length;j++) { 
 			double previous_output = Layers[out_index-1].neurons[j].value;
@@ -1289,22 +1470,45 @@ class Neural_Net{
 		}
 	}
 	
+	
 	//Update all the subsequent hidden layers
 	for(int i = out_index-1; i > 0; i--) {
 		// For all neurons in that layers
 		for(int j = 0; j < Layers[i].neurons.length; j++) {
 			double output = Layers[i].neurons[j].value;
 			double gradient_sum = sumGradient(j,i+1);
-			double delta = (gradient_sum)*(output*(1-output));
+			
+		
+			
+			
+			if(Sigmoid == true) {
+				 delta = gradient_sum*(output*(1-output));
+    		}else if(Tanh == true) {
+    			delta = gradient_sum*(1 - output*output);
+
+    		}else if(Relu==true) {
+    			if(output >=0) {
+    				delta = gradient_sum;
+    			}else {
+    				delta =gradient_sum*0.01;
+    			}
+    		}
+		
+		
 			Layers[i].neurons[j].gradient = delta;
 			// And for all their weights
 			for(int k = 0; k < Layers[i].neurons[j].weights.length; k++) {
 				double previous_output = Layers[i-1].neurons[k].value;
 				double error = delta*previous_output;
+
+
+				
 				Layers[i].neurons[j].backprop_weights[k] = Layers[i].neurons[j].weights[k] - Learning_Rate*error;
 			}
 		}
 	}
+	
+	
 	
 	// Here we do another pass where we update all the weights
 	    	for(int i = 0; i< Layers.length;i++) {
@@ -1314,6 +1518,10 @@ class Neural_Net{
 	    	}
 	    	
 	    }
+	
+
+	 
+	 
 	 public  void Start_Training(int Training_Iterations) {
 	    	for(int i = 0; i < Training_Iterations; i++) {
 	    		for(int j = 0; j < Training_Data.Data.length; j++) {
@@ -1509,6 +1717,21 @@ class Neural_Net{
 		VNET.Set_Scale(650, 900);
 		VNET.Show_Image();
 	 }
+	 public  void Set_Activation_Function(String Activation_Function_Name) {
+		 if(Activation_Function_Name.equals("Relu")) {
+			 this.Sigmoid=false;
+			 this.Tanh=false;
+			 this.Relu=true;
+		 }else if(Activation_Function_Name.equals("Sigmoid")) {
+			 this.Sigmoid=true;
+			 this.Tanh=false;
+			 this.Relu=false;
+		 }else if(Activation_Function_Name.equals("Tanh")) {
+			 this.Sigmoid=false;
+			 this.Tanh=true;
+			 this.Relu=false;
+		 }
+	 }
 }
 
 
@@ -1548,6 +1771,7 @@ class Q_Learner{
 		}
 		
 	}
+
 	public void Train(int state,int action ,int next_state,double reward,boolean done) {
 		
 		double[] next_states = this.Q_Table.Matrix_Body[ next_state];
