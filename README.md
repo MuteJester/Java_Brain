@@ -119,7 +119,8 @@ Java Brain Offers you a method which is a part of the Neural_Net class which all
   * Pattern Replacment
   * Pulling and pushing values into csv stated position
   * CSV spliting by percentage into seperate data sets
-  * Column Calculations such as - Column Mean,Column Median,Column Standard Deviation and Column Variance
+  * Column Statistical Calculations such as - Column Mean,Column Median,Column Standard Deviation and Column Variance/Covariance
+  * Column Missing Value Reduction / Replacement
   
   
   
