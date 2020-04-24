@@ -1,3 +1,7 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -15,7 +19,9 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+
 
 
 
@@ -247,7 +253,6 @@ public class Java_Brain {
 		}
 		return res;
 	}
-
 	public void Add_Column(String Column_Name) {
 		this.Number_Of_Columns++;
 		this.Column_Names.add(Column_Name);
@@ -267,14 +272,17 @@ public class Java_Brain {
 			
 			int n_of_rows_needed =Column_Values.size()-Number_Of_Rows;
 			int cr = this.Number_Of_Rows;
-			for(int j=0;j<n_of_rows_needed-1;j++) {
+			for(int j=0;j<=n_of_rows_needed-1;j++) {
 				this.Add_Row();
 			}
 
 			
 			for(i=cr;i<Column_Values.size();i++) {
-				this.CSV_Set_Value(i, Number_Of_Columns, Column_Values.get(i));
+				this.CSV_Set_Value(i+1, Number_Of_Columns, Column_Values.get(i));
+				
 			}
+			this.Column_Names.add(Column_Name);
+
 			
 		}
 		else {
@@ -346,6 +354,92 @@ public class Java_Brain {
 		
 		return output;
 	}
+	public static Java_Brain Paint_Data(double Max_X_Value,double Max_Y_Value) {
+		Java_Brain result = new Java_Brain();
+		SPlot plot = new SPlot();
+		Image DrawCanvas = plot.Get_Scatter_Plot("X", "Y",Max_X_Value , Max_Y_Value);
+		class mouse_l implements MouseListener{
+			public  int last_x_click;
+			public 	int last_y_click;
+			boolean click =false;
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				last_x_click = e.getX();
+				last_y_click = e.getY();
+				click = true;
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		}
+		class AL implements ActionListener{
+			boolean state =false;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state = true;				
+			}
+		}
+		AL al = new AL();
+		mouse_l ml = new mouse_l();
+		SIPL_Window rend = new SIPL_Window(DrawCanvas.IMG);
+		rend.addMouseListener(ml);
+		JButton finish = new JButton("Render Points");
+		finish.setBounds(DrawCanvas.IMG.getWidth()+10, 50, 140, 30);
+		rend.add(finish);
+		rend.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		finish.addActionListener(al);
+		ArrayList<String> X_Vals = new ArrayList<String>();	
+		ArrayList<String> Y_Vals = new ArrayList<String>();	
+		double tx,ty;
+		while(al.state==false) {
+			if(ml.click==true) {
+				
+				tx = tlb.Remap((float)ml.last_x_click-6, (float)105, (float)720, 0, (float)Max_X_Value );
+				ty = tlb.Remap((float)ml.last_y_click-35, (float)565, (float)80, 0, (float)Max_Y_Value);
+				
+				DrawCanvas.Draw_Circle((int)ml.last_x_click-6, (int)ml.last_y_click-35, 3, CSET.Royal_Blue,"Fill");
+				DrawCanvas.Draw_Circle((int)ml.last_x_click-6, (int)ml.last_y_click-35, 4, CSET.White_Smoke);
+				ml.click=false;
+				//DrawCanvas.Commint_Matrix_Changes();
+				X_Vals.add(String.format("%f", tx));
+				Y_Vals.add(String.format("%f", ty));
+
+
+			}
+			
+			rend.Refresh_Frame(DrawCanvas.IMG,DrawCanvas.IMG.getWidth()+170,DrawCanvas.IMG.getHeight());
+
+		}
+		rend.dispose();
+		result.Add_Column("X", X_Vals);
+		result.Add_Column("Y", Y_Vals);
+		return result;
+	}
 	//
 	
 	//Math Utilities
@@ -415,6 +509,15 @@ public class Java_Brain {
 		double Deviation = Get_Column_Standard_Deviation(Column_Number);
 		return (Deviation)*(Deviation);
 	}
+	public double Get_Column_Covariance(int Column_X,int Column_Y) {
+		double covar = 0;
+		double x_mean = this.Get_Column_Mean(Column_X);
+		double y_mean = this.Get_Column_Mean(Column_Y);
+		for(int i=1;i<=this.Number_Of_Rows;i++) {
+			covar += (Double.parseDouble(this.CSV_Get_Value(i, Column_X)) - x_mean)*(Double.parseDouble(this.CSV_Get_Value(i, Column_Y)) - y_mean);
+		}
+		return covar/(this.Number_Of_Rows-1);
+	}
 	public double Get_Max_Value_In_Column(int Column_Number) {
 		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
 		double max = Double.MIN_VALUE;
@@ -437,7 +540,88 @@ public class Java_Brain {
 		}
 		return min;
 	}
+	public void Fill_Missing_With_Column_Mean(int Column_Number) {
+		double mean =0;
+		ArrayList<Integer> positions = new ArrayList<Integer>();
+		for(int i=1;i<=this.Number_Of_Rows;i++) {
+			String val = this.CSV_Get_Value(i, Column_Number);
+			if(!val.equals("")) {
+				mean+=Double.parseDouble(val);
+			}else {
+				positions.add(i);
+			}
+		}
+		mean /= this.Number_Of_Rows;
+		String smean = String.format("%.4f", mean);
+		for(int i =0; i<positions.size();i++) {
+			this.CSV_Set_Value(positions.get(i), Column_Number, smean);
+		}
+	}
+	
+	public void Fill_Missing_With_Column_Median(int Column_Number) {
+		double median =0;
+		double[] dt = new double[Number_Of_Rows];
+		ArrayList<Integer> blanks = new ArrayList<Integer>();
+		String sam ;
+		for(int i = 1 ; i<=this.Number_Of_Rows;i++) {
+			sam = this.CSV_Get_Value(i, Column_Number);
+			if(!sam.equals("")) {
+				dt[i-1] = Double.parseDouble(sam);
 
+			}else {
+				blanks.add(i);
+			}
+		}
+		Arrays.sort(dt);
+		if (dt.length % 2 == 0) {
+			median = (double)(dt[dt.length / 2] + (double)dt[(dt.length / 2) - 1]) / 2;
+		}
+		else {
+
+			median = dt[dt.length / 2];
+		}
+		String sm = String.format("%.4f", median);
+		for(int i =0; i<blanks.size();i++) {
+			this.CSV_Set_Value(blanks.get(i), Column_Number, sm);
+		}
+		
+	}
+	public void Fill_Missing_With_Pattern(int Column_Number,String Pattern) {
+		String sm;
+		for(int i =1;i <= this.Number_Of_Rows;i++) {
+			sm = this.CSV_Get_Value(i, Column_Number);
+			if(sm.equals("")) {
+				this.CSV_Set_Value(i, Column_Number, Pattern);
+			}
+		}
+	}
+	public int Number_Of_Missing(int Column_Number) {
+		int miss =0;
+		String ms;
+		for(int i = 1; i<=this.Number_Of_Rows;i++) {
+			ms = this.CSV_Get_Value(i, Column_Number);
+			if(ms.equals("")) {
+				miss++;
+			}
+		}
+		return miss;
+	}
+	public int Number_Of_Missing() {
+		int miss =0;
+		for(int i = 1 ; i<=this.Number_Of_Columns;i++) {
+			miss += this.Number_Of_Missing(i);
+		}
+		return miss;
+	}
+	public Java_Brain Compute_Column_Correlations() {
+		Java_Brain Cors = new Java_Brain();
+		
+		return Cors;
+	}
+	
+	
+	
+	
 	//Algorithms
 	public double Squared_Point_Distance(Point first, Point second) {
 		return (first.x - second.x)*(first.x - second.x) + (first.y - second.y)*(first.y - second.y) + (first.z - second.z)*(first.z - second.z);
@@ -885,18 +1069,14 @@ public class Java_Brain {
 		return Weights;
 		
 	}
-	public ArrayList<String> Get_Linear_Regression_Predictions(Matrix LR,int True_Column,ArrayList<Integer> Columns_Of_Sampels){
-		ArrayList<String> res = new ArrayList<String>();
+	public void Validate_Linear_Regression(Matrix LR,int True_Column,int[] Samples_Column_Numbers){
 		for(int i =1;i<=this.Number_Of_Rows;i++) {
 			double pred = LR.Matrix_Body[0][0];
-
-			for(int j=1;j<Columns_Of_Sampels.size()+1;j++) {
-				pred += LR.Matrix_Body[j][0]*Double.parseDouble(this.CSV_Get_Value(i, Columns_Of_Sampels.get(j-1)));
+			for(int j=1;j<Samples_Column_Numbers.length+1;j++) {
+				pred += LR.Matrix_Body[j][0]*Double.parseDouble(this.CSV_Get_Value(i, Samples_Column_Numbers[j-1]));
 			}
 			System.out.println("Predictions: " + pred + "  Actual "  + this.Get_Specific_Column(True_Column).get(i-1));
-			res.add(String.format("%f", pred));
 		}
-		return res;
 	}
 	
 	//Visual
@@ -1001,7 +1181,7 @@ public class Java_Brain {
 			
 			//frame rate control
 			try {
-				TimeUnit.MILLISECONDS.sleep(300);
+				TimeUnit.MILLISECONDS.sleep(10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1083,7 +1263,42 @@ public class Java_Brain {
 		rg.Show_Image();
 		
     }
-    
+    public Matrix Get_Variance_Covariance_Matirx(int[] input_Columns) {
+    	
+    	Matrix data = new Matrix(this.Number_Of_Rows,input_Columns.length);
+    	Matrix dataOnes = new Matrix(this.Number_Of_Rows,1);
+    	for(int i=0;i<this.Number_Of_Rows;i++) {
+    			dataOnes.Matrix_Body[i][0]=1;
+    		
+    	}
+    	Matrix dataOnestag = new Matrix(dataOnes);
+    	dataOnestag.Matrix_Transpose();
+    	for(int i=1;i<=this.Number_Of_Rows;i++) {
+    		for(int j=0;j<input_Columns.length;j++) {
+    			data.Matrix_Body[i-1][j] = Double.parseDouble(this.CSV_Get_Value(i, input_Columns[j]));
+    		}
+    	}
+    	//transformation a = A - 11'x/n
+    	dataOnestag = dataOnes.Dot_Product(dataOnestag);
+    	dataOnestag = dataOnestag.Dot_Product(data);
+    	dataOnestag.Divide(this.Number_Of_Rows);
+    	data.Subtract(dataOnestag);
+    	dataOnes = new Matrix(data);
+    	dataOnes.Matrix_Transpose();
+    	//(a*a')/n 
+    	data = dataOnes.Dot_Product(data);
+    	data.Divide(Number_Of_Rows);
+    	
+    	return data;
+    	
+    }
+
+
+
+
+
+
+
 }
 
 class Image_Tools{
@@ -1199,7 +1414,6 @@ class Neuron{
         this.gradient = 0;
         this.value=value;
     }
-    
     // Constructor for the input neurons
     public Neuron(double value){
         this.weights = null;
@@ -1207,14 +1421,12 @@ class Neuron{
         this.backprop_weights = this.weights;
         this.gradient = -1;
         this.value = value;
-    }
-    
+    }   
     // Static function to set min and max weight for all variables
     public static void setRangeWeight(double min,double max) {
     	minWeightValue = min;
     	maxWeightValue = max;
-    }
-    
+    }  
     // Function used at the end of the backprop to switch the calculated value in the
     // cache weight in the weights
     public void Update_Weights() {
@@ -1416,7 +1628,6 @@ class Neural_Net{
 	        	}
 	        } 	
 	    }
-	
 	    // This function sums up all the gradient connecting a given neuron in a given layer
 	public double sumGradient(int neuron_index,int layer_index) {
 		  double gradient_sum = 0;
@@ -1426,10 +1637,7 @@ class Neural_Net{
 	    		gradient_sum += current_neuron.weights[neuron_index]*current_neuron.gradient;
 	    	}
 	    	return gradient_sum;
-	    }
-	
-	 
-	 
+	    }	 
     public  void Back_Propagate(Data_Cartridge training_Data) {
 	    	
 	    	int number_layers = Layers.length;
@@ -1509,7 +1717,6 @@ class Neural_Net{
 	}
 	
 	
-	
 	// Here we do another pass where we update all the weights
 	    	for(int i = 0; i< Layers.length;i++) {
 	    		for(int j = 0; j < Layers[i].neurons.length;j++) {
@@ -1518,10 +1725,6 @@ class Neural_Net{
 	    	}
 	    	
 	    }
-	
-
-	 
-	 
 	 public  void Start_Training(int Training_Iterations) {
 	    	for(int i = 0; i < Training_Iterations; i++) {
 	    		for(int j = 0; j < Training_Data.Data.length; j++) {
