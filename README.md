@@ -114,6 +114,7 @@ Java Brain Offers you a method which is a part of the Neural_Net class which all
   ### Currently Supported CSV Handling Functionality
   
   * Reading/Writing CSV Files
+  * CSV Importation From Web URL's
   * Column Classification (Numeric/Categorical/Date-Time/Text)
   * Single Block/Column/Row Manipulations
   * Removal and Addition of columns and rows
