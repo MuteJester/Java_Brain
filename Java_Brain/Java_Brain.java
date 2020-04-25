@@ -13,17 +13,56 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
 
 
+class Column{
+	public int Type;
+	// 0 = Numeric
+	// 1 = Categorical
+	// 2 = Text
+	// 3 = Date Time
+	public int Column_Number;
+	public int Missing;
+	public String Column_Name;
+	public String[] Get_Categories() {
+		if(Type != 1) {
+			System.out.println("Column Is Not Categorical");
+			return null;
+		}else{
+			return this.Categories;
+		}
+	}
+	public String Get_Column_Type() {
+		switch(Type) {
+		case 0:
+			return "Numeric";
+		case 1:
+			return "Categorical";
+		case 2:
+			return "Text";
+		case 3:
+			return "Date-Time";
+		}
+		return null;
+	}
+	public void Set_Categories(ArrayList<String> categories) {
+		this.Categories = categories.toArray(new String[0]);
+	}
+	private String[] Categories;
+}
 
 
 public class Java_Brain {
@@ -31,28 +70,85 @@ public class Java_Brain {
 	public static Color_Palette CSET = new Color_Palette();
 	public static BufferedReader Reader;
 	SPlot plot = new SPlot();
-	public ArrayList<ArrayList<String>> CSV_DATA;
-	public ArrayList<String> Column_Names;
+	protected ArrayList<ArrayList<String>> CSV_DATA;
+	public ArrayList<Column> Column_Info;
 
 	public int Number_Of_Rows=0,Number_Of_Columns=0;
 	public Java_Brain() {
 		CSV_DATA = new ArrayList<ArrayList<String>>();
-		Column_Names = new ArrayList<String>();
 	}
 	
 	//Data Set Handling
 	public void Load_CSV_File(String CSV_PATH) throws IOException {
 		 try {
+			 if(CSV_PATH.contains("www.") || CSV_PATH.contains("http:")|| CSV_PATH.contains("https:")) {
+				    URL url = new URL(CSV_PATH);
+				    BufferedReader read = new BufferedReader(
+				    new InputStreamReader(url.openStream())); 
+					 String line;
+					 int max_number_of_Columns = 0;
+					 int j =0;
+					 line = read.readLine();
+					 if((line) != null) {
+						 Column_Info = new ArrayList<Column>();
+					        String[] values = line.split(",");
+					        for(int i = 0;i<values.length;i++) {
+					        	Column_Info.add(new Column());
+					        	Column_Info.get(Column_Info.size()-1).Column_Name=values[i];
+					        }
+					        
+					 }
+					 
+					    while ((line = read.readLine()) != null) {
+					        String[] values = line.split(",");
+					        if(values.length > max_number_of_Columns) {
+					        	max_number_of_Columns = values.length;
+					        }
+					        CSV_DATA.add(new ArrayList<String>());
+					        ArrayList<String> ptr = CSV_DATA.get(j);
+					        for(int i = 0;i<values.length;i++) {
+					        	ptr.add(values[i]);
+					        }
+					        
+					        j++;
+					    }
+					    
+					    Number_Of_Rows=j;
+					    Number_Of_Columns=max_number_of_Columns;
+					    int mg;
+						for(int i = 0 ; i <CSV_DATA.size();i++) {
+							ArrayList<String> ptr = CSV_DATA.get(i);
+							for(int k =0;k<max_number_of_Columns;k++) {
+								mg = ptr.size();
+								if(mg < max_number_of_Columns) {
+									while(mg < max_number_of_Columns) {
+										ptr.add("Null");
+										mg++;
+									}
+								}else {
+									break;
+								}
+								
+							}
+						}
+						
+						for(int z=1;z<=this.Number_Of_Columns;z++) {
+							this.Refresh_Column_Info(z);
+						}
+			 }
+			 else {
+			 
 			Reader = new BufferedReader(new FileReader(CSV_PATH));
 			 String line;
 			 int max_number_of_Columns = 0;
 			 int j =0;
 			 line = Reader.readLine();
 			 if((line) != null) {
-				 Column_Names = new ArrayList<String>();
+				 Column_Info = new ArrayList<Column>();
 			        String[] values = line.split(",");
 			        for(int i = 0;i<values.length;i++) {
-			        	Column_Names.add(values[i]);
+			        	Column_Info.add(new Column());
+			        	Column_Info.get(Column_Info.size()-1).Column_Name=values[i];
 			        }
 			        
 			 }
@@ -89,8 +185,11 @@ public class Java_Brain {
 						
 					}
 				}
+				for(int z=1;z<=this.Number_Of_Columns;z++) {
+					this.Refresh_Column_Info(z);
+				}
 			    
-			
+			 }
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Error In File Openning");
@@ -105,7 +204,10 @@ public class Java_Brain {
 	}
 	public void Write_CSV(String F_Name) throws IOException {
 		FileWriter csvWriter = new FileWriter(F_Name + ".csv");
-		    csvWriter.append(String.join(",", this.Column_Names));
+			for(int i=0;i<this.Number_Of_Columns;i++) {
+				csvWriter.append(this.Column_Info.get(i).Column_Name);
+				csvWriter.append(",");
+			}
 		    csvWriter.append("\n");
 		for (int i =0;i<this.Number_Of_Rows;i++) {
 		    csvWriter.append(String.join(",", CSV_DATA.get(i)));
@@ -253,12 +355,122 @@ public class Java_Brain {
 		}
 		return res;
 	}
+	private int Determinate_Column_Type(int Column_Number) {
+		boolean numeric = true;
+		ArrayList<String> Categories = new ArrayList<String>();
+		//numeric test
+		String tm;
+		for(int i=1;i<=this.Number_Of_Rows;i++) {
+			tm = this.CSV_Get_Value(i, Column_Number);
+			if(!tm.matches("[-,+,0-9,.,0-9]+")) {
+				if(!tm.equals("")) {
+					numeric=false;
+				}
+			}
+		}
+		
+		if(numeric == true) {
+			return 0;
+		}
+		
+		
+	//date time test
+		int num_of_dates =0;
+		for(int i =1;i<=this.Number_Of_Rows;i++) {
+			tm = this.CSV_Get_Value(i, Column_Number);
+			if(tm.matches("[0-9/0-9/0-9]+")) {
+				num_of_dates++;
+			}
+		}
+		if(num_of_dates>0) {
+			return 3;
+		}
+		
+		Categories = this.Get_Specific_Column(Column_Number);
+		//categorical test
+		for(int i = 0;i<Categories.size();i++) {
+			tm = Categories.get(i);
+			if(!tm.equals("0") && !tm.equals("")) {
+				for(int j = i+1;j<this.Number_Of_Rows;j++) {
+					if(Categories.get(j).equals(tm)) {
+						Categories.set(j, "0");
+					}
+				}
+			}
+		}
+		int num_of_cat = 0;
+		for(int i =0;i<Categories.size();i++) {
+			if(!Categories.get(i).equals("0")){
+				num_of_cat++;
+			}
+		}
+		
+		if(num_of_cat < (Categories.size()/2)+1) {
+			return 1;
+		}
+		
+	
+		
+		
+		//else set as text
+		return 2;
+	}
+	public void Refresh_Column_Info(int Column_Number) {
+		Column t = this.Column_Info.get(Column_Number-1);
+		t.Type = this.Determinate_Column_Type(Column_Number);
+		if(t.Type==1) {
+			ArrayList<String> Categories = new ArrayList<String>();
+			String tm;
+			Categories = this.Get_Specific_Column(Column_Number);
+			//categorical test
+			for(int i = 0;i<Categories.size();i++) {
+				tm = Categories.get(i);
+				if(!tm.equals("0") && !tm.equals("")) {
+					for(int j = i+1;j<this.Number_Of_Rows;j++) {
+						if(Categories.get(j).equals(tm)) {
+							Categories.set(j, "0");
+						}
+					}
+				}
+			}
+			ArrayList<String> Z = new ArrayList<String>();
+			Z.add("0");
+			Categories.removeAll(Z);
+			t.Set_Categories(Categories);
+			
+		}
+		t.Column_Number = Column_Number;
+		t.Missing = this.Number_Of_Missing(Column_Number);
+		
+		
+	}
+	public void Print_CSV_Column_Info() {
+		for(int i=1;i<=this.Number_Of_Columns;i++) {
+			System.out.println("=============================");
+			System.out.print("Column Number: [" + this.Column_Info.get(i-1).Column_Number + "]\n");
+			System.out.print("Column Name: [" + this.Column_Info.get(i-1).Column_Name + "]\n");
+			System.out.print("Column Type: [" + this.Column_Info.get(i-1).Get_Column_Type()+ "]\n");
+			if(this.Column_Info.get(i-1).Type ==1) {
+				System.out.print("Categories: ");
+				String[] cat = Column_Info.get(i-1).Get_Categories();
+				for(int z = 0 ;z < cat.length;z++) {
+					System.out.print("{" + cat[z] + "} ");
+				}
+				System.out.print("\n");
+			}
+			System.out.print("Column Missing Values: [" + this.Column_Info.get(i-1).Missing+ "]");
+			System.out.println("\n=============================\n");
+
+			
+		}
+	}
 	public void Add_Column(String Column_Name) {
 		this.Number_Of_Columns++;
 		this.Column_Names.add(Column_Name);
 		for(int i=1;i<=this.Number_Of_Rows;i++) {
 			this.CSV_DATA.get(i-1).add("0");
 		}
+		
 	}
 	public void Add_Column(String Column_Name,ArrayList<String> Column_Values) {
 		this.Number_Of_Columns++;
@@ -557,7 +769,39 @@ public class Java_Brain {
 			this.CSV_Set_Value(positions.get(i), Column_Number, smean);
 		}
 	}
-	
+	public void Remove_Rows_With_Missing_Values() {
+			String ms;
+			ArrayList<Integer> Miss = new ArrayList<Integer>();
+			
+			for(int j=1;j<=this.Number_Of_Columns;j++) {
+				for(int i = 1; i<=this.Number_Of_Rows;i++) {
+					ms = this.CSV_Get_Value(i, j);
+					if(ms.equals("")) {
+						Miss.add(i+1);
+					}
+				}
+			}
+			if(Miss.size() == 0) 
+			{
+				return;
+			}else
+			{
+			LinkedHashSet<Integer> hashSet = new LinkedHashSet<>(Miss);
+	        ArrayList<Integer> listWithoutDuplicates = new ArrayList<>(hashSet);
+	        
+	        
+	        for(int i=0;i<listWithoutDuplicates.size();i++) {
+	        	System.out.println(listWithoutDuplicates.get(i));
+	        }
+	        
+	        for(int i=0;i<listWithoutDuplicates.size();i++) {
+	        	//System.out.println(listWithoutDuplicates.get(i)-(i));
+	        	this.Remove_Row(listWithoutDuplicates.get(i)-(i+1));
+	        }
+	        
+	       			
+		}
+	}
 	public void Fill_Missing_With_Column_Median(int Column_Number) {
 		double median =0;
 		double[] dt = new double[Number_Of_Rows];
@@ -613,12 +857,57 @@ public class Java_Brain {
 		}
 		return miss;
 	}
-	public Java_Brain Compute_Column_Correlations() {
+	public Java_Brain Compute_Column_Correlations(String Correlation_Type) {
+		ArrayList<Integer> numeric = new ArrayList<Integer>();
+		for(int i =1;i<=this.Number_Of_Columns;i++) {
+			if(this.Column_Info.get(i-1).Type == 0) {
+				numeric.add(i);
+			}
+		}
+		if(numeric.size() < 2) {
+			System.out.println("You Need Minimum 2 Numeric Columns To Find Correlations");
+			return null;
+		}
 		Java_Brain Cors = new Java_Brain();
+		
+		int number_of_correlations = Math.round(((numeric.size())*(numeric.size()-1))/2);
+		Cors.Number_Of_Columns =2;
+		Cors.Column_Names.add("Between");
+		Cors.Column_Names.add("Correlation");
+
+		for(int i =0;i<number_of_correlations;i++) {
+			Cors.Add_Row();
+		}
+	
+
+		
+		int pos =1;
+		for(int i=0;i<numeric.size();i++) {
+			for(int j=i+1;j<numeric.size();j++) {
+				Cors.CSV_Set_Value(pos, 1, this.Column_Info.get(numeric.get(i)-1).Column_Name + " - " + this.Column_Info.get(numeric.get(j)-1).Column_Name);
+				if(Correlation_Type.equals("Pearson")) { 
+				Cors.CSV_Set_Value(pos, 2, String.format("%.5f",
+						this.Get_Pearson_Correlation_Coefficient(
+								this.Get_Specific_Column(numeric.get(i)), this.Get_Specific_Column(numeric.get(j)))));
+				}
+				else if(Correlation_Type.equals("Spearman")) {
+					Cors.CSV_Set_Value(pos, 2, String.format("%.5f",
+							this.Get_Spearmans_Correlation_Coefficient(
+									this.Get_Specific_Column(numeric.get(i)), this.Get_Specific_Column(numeric.get(j)))));
+					
+					
+				}else {
+					System.out.println("Unknown Correlation Type Please Specify - Pearson/Spearman");
+					return null;
+				}
+				pos++;
+			}
+		}
+		
 		
 		return Cors;
 	}
-	
+
 	
 	
 	
@@ -805,7 +1094,50 @@ public class Java_Brain {
 		r /= Math.sqrt(  ((Y.size()*sigma_xs - sigma_x*sigma_x)) * ((Y.size()*sigma_ys - sigma_y*sigma_y)) );
 		return r;
 	}
-	public double Get_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
+    public double[] Rankify(ArrayList<String> Y) throws NumberFormatException{
+    	  	try {
+    		double Rank_Y[] = new double[Y.size()]; 
+    	      
+    	    for(int i = 0; i < Rank_Y.length; i++)  
+    	    { 
+    	        int r = 1, s = 1; 
+    	        for(int j = 0; j < i; j++) { 
+    	            if (Double.parseDouble(Y.get(j)) < Double.parseDouble(Y.get(i)) ) r++; 
+    	            if (Double.parseDouble(Y.get(j)) == Double.parseDouble(Y.get(i)) ) s++; 
+    	        } 
+    	        for (int j = i+1; j < Rank_Y.length; j++) { 
+    	            if (Double.parseDouble(Y.get(j)) < Double.parseDouble(Y.get(i))) r++; 
+    	            if (Double.parseDouble(Y.get(j)) == Double.parseDouble(Y.get(i))) s++; 
+    	        }
+    	        Rank_Y[i] = r + (s-1) * 0.5;         
+    	    } 
+    	    return Rank_Y; 
+    	  	}
+    	  	catch(NumberFormatException e) {
+    	  		System.out.println("There Are Missing Values In One Of The Columns\nPlease Take Care Of Missing Values");
+    	  		return null;
+    	  	}
+    }
+    public  double Get_Spearmans_Correlation_Coefficient(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
+    	double SCC = 0;
+    	double rankY[]=this.Rankify(Y),rankYhat[]=this.Rankify(Y_Hat);
+        double sum_X = 0, sum_Y = 0,sum_XY = 0; 
+        double squareSum_X = 0, squareSum_Y = 0; 
+        for (int i = 0; i < rankY.length; i++) 
+        { 
+            sum_X += + rankY[i]; 
+            sum_Y += rankYhat[i]; 
+            sum_XY += rankY[i] * rankYhat[i]; 
+            squareSum_X += rankY[i] * rankY[i]; 
+            squareSum_Y += rankYhat[i] * rankYhat[i]; 
+        } 
+      
+    	SCC  =(rankY.length * sum_XY -  sum_X * sum_Y) /  Math.sqrt((rankY.length * squareSum_X - sum_X * sum_X) *  (rankY.length * squareSum_Y - sum_Y * sum_Y)); 
+    	
+    	return SCC;
+	}
+
+    public double Get_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		double R_S = this.Get_Pearson_Correlation_Coefficient(Y, Y_Hat);
 		R_S*=R_S;
 		return R_S;
