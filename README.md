@@ -114,12 +114,13 @@ Java Brain Offers you a method which is a part of the Neural_Net class which all
   ### Currently Supported CSV Handling Functionality
   
   * Reading/Writing CSV Files
+  * Column Classification (Numeric/Categorical/Date-Time/Text)
   * Single Block/Column/Row Manipulations
   * Removal and Addition of columns and rows
   * Pattern Replacment
   * Pulling and pushing values into csv stated position
   * CSV spliting by percentage into seperate data sets
-  * Column Statistical Calculations such as - Column Mean,Column Median,Column Standard Deviation and Column Variance/Covariance
+  * Column Statistical Calculations such as - Column Standard Deviation and Column Variance/Covariance,Column Correlation..
   * Column Missing Value Reduction / Replacement
   
   
