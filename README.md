@@ -100,29 +100,29 @@ Java Brain Offers you a method which is a part of the Neural_Net class which all
 
 
 ### Currently Supported Data Mining / Machine Learning / Deep Learning, Algorithms
-  * Linear Regression using Static Formula (Only supported for single variable linear regression)
-  * Linear Regression using Gradient Descent (Multivariable regression supported using matrix with Lasso Regression and L1 Regularization)
-  * Logistic Regression of binary variable as well as multivariable equations
-  * Validation Of Logistic Regression - Confusion Matrix
-  * K-Means calculation (up to 3-dimensional data variables)
-  * Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use
-  * Q Learning "Custom-fit" Class applicable for any use 
-  * Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models
-  * Some of the models have supported validation methods which will automatically compare machine guesses against actual values
+  * __Linear Regression using Static Formula (Only supported for single variable linear regression)__
+  * __Linear Regression using Gradient Descent (Multivariable regression supported using matrix with Lasso Regression and L1 Regularization)__
+  * __Logistic Regression of binary variable as well as multivariable equations__
+  * __Validation Of Logistic Regression - Confusion Matrix__
+  * __K-Means calculation (up to 3-dimensional data variables)__
+  * __Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use__
+  * __Q Learning "Custom-fit" Class applicable for any use__
+  * __Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models__
+  * __Some of the models have supported validation methods which will automatically compare machine guesses against actual values__
   
   
   ### Currently Supported CSV Handling Functionality
   
-  * Reading/Writing CSV Files
-  * CSV Importation From Web URL's
-  * Column Classification (Numeric/Categorical/Date-Time/Text)
-  * Single Block/Column/Row Manipulations
-  * Removal and Addition of columns and rows
-  * Pattern Replacment
-  * Pulling and pushing values into csv stated position
-  * CSV spliting by percentage into seperate data sets
-  * Column Statistical Calculations such as - Column Standard Deviation and Column Variance/Covariance,Column Correlation..
-  * Column Missing Value Reduction / Replacement
+  * __Reading/Writing CSV Files__
+  * __CSV Importation From Web URL's__
+  * __Column Classification (Numeric/Categorical/Date-Time/Text)__
+  * __Single Block/Column/Row Manipulations__
+  * __Removal and Addition of columns and rows__
+  * __Pattern Replacment__
+  * __Pulling and pushing values into csv stated position__
+  * __CSV spliting by percentage into seperate data sets__
+  * __Column Statistical Calculations such as - Column Standard Deviation and Column Variance/Covariance,Column Correlation..__
+  * __Column Missing Value Reduction / Replacement__
   
   
   
