@@ -1203,7 +1203,7 @@ public class Java_Brain {
     	
     	return SCC;
 	}
-
+   
     public double Get_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		double R_S = this.Get_Pearson_Correlation_Coefficient(Y, Y_Hat);
 		R_S*=R_S;
@@ -1272,28 +1272,119 @@ public class Java_Brain {
 		System.out.println("Recall : [ " +((TP)/TP+FN)+" ]");
 		
 	}
-	public void Validate_Logistic_Regression(Matrix LR_Weights,int Binary_Column,int[] Sampled_Rows) {		
-		for(int i =1;i<=this.Number_Of_Rows;i++) {
-			double pred_s = LR_Weights.Matrix_Body[0][0];
-			for(int j=1;j<=Sampled_Rows.length;j++) {
-				pred_s += LR_Weights.Matrix_Body[j][0] *Double.parseDouble(this.CSV_Get_Value(i,Sampled_Rows[j-1]));
+	public double Euclidean_Distance(double[] X1,double[] X2) {
+		if(X1.length != X2.length) {
+			System.out.println("Both Points Must Contain The Same Amount Of Values");
+			return Double.POSITIVE_INFINITY;
+		}else {
+			double dis =0;
+			for(int i=0;i<X1.length;i++) {
+				dis+=Math.pow((X2[i]-X1[i]),2);
 			}
-			pred_s = this.Sigmoid(pred_s);
-			
-			System.out.print("\n====================\n");
-			System.out.print("Values: ");
-			for(int z =0;z<Sampled_Rows.length;z++) {
-				System.out.print(this.CSV_Get_Value(i,Sampled_Rows[z]) + " ");
-
+			return Math.sqrt(dis);
+		}
+	}
+	public double Manhattan_Distance(double[] X1,double[] X2) {
+		if(X1.length != X2.length) {
+			System.out.println("Both Points Must Contain The Same Amount Of Values");
+			return Double.POSITIVE_INFINITY;
+		}else {
+			double dis =0;
+			for(int i=0;i<X1.length;i++) {
+				dis+=Math.abs(X2[i]-X1[i]);
 			}
-			System.out.print("\n====================\n");
+			return dis;
+		}
+	}
+	public String KNN(int K ,double Test_Values[],int Sample_Columns[],int Result_Column) {
+		double distances[] = new double[this.Number_Of_Rows];
+		double x[];
+		
+		for(int i=1;i<=this.Number_Of_Rows;i++) {
+			x = new double[Sample_Columns.length];
+			for(int j=0;j<Sample_Columns.length;j++) {
+				x[j] = Double.parseDouble(this.CSV_Get_Value(i, Sample_Columns[j]));
+			}
+			distances[i-1] = this.Euclidean_Distance(x, Test_Values);
+		}
+		 int[] knn = new int[K];
+		 double min =Double.MAX_VALUE;
+		 for(int i=0;i<K;i++) {
+			 for(int j=0;j<distances.length;j++) {
+				 if(distances[j] < min) {
+					 min = distances[j];
+					 knn[i] = j+1;
+				 }
+			 }
+			 distances[knn[i]-1] = Double.POSITIVE_INFINITY;
+			  min =Double.MAX_VALUE;
+		 }
+		 
+		 String categories[] = this.Column_Info.get(Result_Column-1).Get_Categories();
+		 int cats[] = new int[categories.length];
+		 Arrays.fill(cats, 0);
+		 for(int i=0;i<K;i++) {
+			 String val = this.CSV_Get_Value(knn[i], Result_Column);
+			 for(int j=0;j<categories.length;j++) {
+				 if(val.equals(categories[j])) {
+					 cats[j]++;
+					 break;
+				 }
+			 }
+		 }
+		 
+		 Arrays.sort(cats);
+		 return categories[cats[cats.length-1]- 1];
+	}
+	public Matrix KNN(int K ,double Test_Values[],int Sample_Columns[]) {
+		double distances[] = new double[this.Number_Of_Rows];
+		double x[];
+		 Matrix result = new Matrix(K,2);
 
-			System.out.println("Prediction: [" + pred_s + "] Actual: [" + this.CSV_Get_Value(i, Binary_Column)+"]");
-			System.out.print("\n---------------------\n");
+		for(int i=1;i<=this.Number_Of_Rows;i++) {
+			x = new double[Sample_Columns.length];
+			for(int j=0;j<Sample_Columns.length;j++) {
+				x[j] = Double.parseDouble(this.CSV_Get_Value(i, Sample_Columns[j]));
+			}
+			distances[i-1] = this.Euclidean_Distance(x, Test_Values);
+		}
+		 int[] knn = new int[K];
+		 double min =Double.MAX_VALUE;
+		 for(int i=0;i<K;i++) {
+			 for(int j=0;j<distances.length;j++) {
+				 if(distances[j] < min) {
+					 min = distances[j];
+					 knn[i] = j+1;
+				 }
+			 }
+			 result.Matrix_Body[i][1] = min;
+			 distances[knn[i]-1] = Double.POSITIVE_INFINITY;
+			  min =Double.MAX_VALUE;
+		 }
+		 
+		 for(int i=0;i<K;i++) {
+			 result.Matrix_Body[i][0] = knn[i];
+
+		 }
+		return result;
+	}
+	public Matrix KNN(int K ,Java_Brain Test_Dataset,int Sample_Columns[]) {
+		Matrix Final_Res = new Matrix(Test_Dataset.Number_Of_Rows,(1+K));
+		double xv[] = new double[Sample_Columns.length];
+		for(int i=1;i<=Test_Dataset.Number_Of_Rows;i++) {
+			for(int j=0;j<xv.length;j++) {
+				xv[j] = Double.parseDouble(Test_Dataset.CSV_Get_Value(i, Sample_Columns[j]));
+			}
+			Matrix res = this.KNN(K, xv, Sample_Columns);
+			for(int j = 1 ; j <K+1;j++) {
+				Final_Res.Matrix_Body[i-1][j] = res.Matrix_Body[j-1][0];	
+			}
+
+			Final_Res.Matrix_Body[i-1][0] = i;	
 
 		}
-
-			
+		
+		return Final_Res;
 	}
 
 	private Matrix Step_Gradient(Matrix Current_Weights,double Learning_Rate ,int[] Columns_Of_Sampels,ArrayList<String> True_Y) {
@@ -1352,55 +1443,6 @@ public class Java_Brain {
 		return LE;
 		
 	}
-	/*public Matrix Logistic_Regression(int Values_Column_Number,int Binary_Category_Column_Number,int number_of_iterations,double learning_rate) {
-		double B0 =0,B1=0;
-		ArrayList<String> Values = this.Get_Specific_Column(Values_Column_Number);
-		ArrayList<String> Binary_Category = this.Get_Specific_Column(Binary_Category_Column_Number);
-		ArrayList<Double> Predictions = new ArrayList<Double>();
-		double Cost =0,Lowest_Cost=Double.MAX_VALUE;
-		for(int i = 0;i<number_of_iterations;i++) {
-			
-			//predictions
-			for(int j =0;j<Values.size();j++) {
-				double y = Double.parseDouble(Binary_Category.get(j));
-				double pred = this.Sigmoid(B0 + B1*Double.parseDouble(Values.get(j)));
-				Predictions.add(pred);
-				//System.out.println("Predictions:" +pred + " Reality: " + y);
-				//System.out.println("B0: " + B0 + " B1: " + B1);
-				B0 = B0 + learning_rate*(y - pred)*pred*(1.0-pred)*1.0;
-				B1 = B1 + learning_rate*(y - pred)*pred*(1.0-pred)*Double.parseDouble(Values.get(j));
-
-				//System.out.println("Res: "  + this.Sigmoid(B0_Guess + B1_Guess*Double.parseDouble(Values.get(j))));
-			}
-			
-			//cost
-			
-			for(int j =0;j<Predictions.size();j++) {
-				double y = Double.parseDouble(Binary_Category.get(j));
-				Cost += -y*Math.log(Predictions.get(j)) - (1-y)*Math.log(Predictions.get(j));
-			}
-			
-			Cost *= 1.0/Predictions.size();
-			//System.out.println("COST:" +  Cost);
-			
-			if(Cost<Lowest_Cost) {
-				Lowest_Cost = Cost;
-				//System.out.println("COST: " + Cost + " B0 = "  + B0 + " B1 = " + B1);
-
-			}
-			
-			
-			Predictions.clear();
-			Predictions = new ArrayList<Double>();
-		}
-		
-		
-		Matrix Result = new Matrix(2,1);
-		Result.Matrix_Body[0][0] = B0;
-		Result.Matrix_Body[0][0] = B1;
-		return Result;
-		
-	}*/
 	public Matrix Logistic_Regression(int Value_Column_Numbers[],int Binary_Category_Number,int number_of_iterations,double learning_rate) {
 		ArrayList<ArrayList<String>> Values = new ArrayList<ArrayList<String>>();
 		for(int i=0;i<Value_Column_Numbers.length;i++) {
@@ -1477,6 +1519,31 @@ public class Java_Brain {
 			System.out.println("Predictions: " + pred + "  Actual "  + this.Get_Specific_Column(True_Column).get(i-1));
 		}
 	}
+	public void Validate_Logistic_Regression(Matrix LR_Weights,int Binary_Column,int[] Sampled_Rows) {		
+		for(int i =1;i<=this.Number_Of_Rows;i++) {
+			double pred_s = LR_Weights.Matrix_Body[0][0];
+			for(int j=1;j<=Sampled_Rows.length;j++) {
+				pred_s += LR_Weights.Matrix_Body[j][0] *Double.parseDouble(this.CSV_Get_Value(i,Sampled_Rows[j-1]));
+			}
+			pred_s = this.Sigmoid(pred_s);
+			
+			System.out.print("\n====================\n");
+			System.out.print("Values: ");
+			for(int z =0;z<Sampled_Rows.length;z++) {
+				System.out.print(this.CSV_Get_Value(i,Sampled_Rows[z]) + " ");
+
+			}
+			System.out.print("\n====================\n");
+
+			System.out.println("Prediction: [" + pred_s + "] Actual: [" + this.CSV_Get_Value(i, Binary_Column)+"]");
+			System.out.print("\n---------------------\n");
+
+		}
+
+			
+	}
+
+	
 	
 	//Visual
 	public void Plot_Linear_Regression(int X_Values_Column_Number,int Y_Values_Column_Number,String X_Name,String Y_Name) {
