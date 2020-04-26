@@ -76,9 +76,23 @@ public class Java_Brain {
 	public int Number_Of_Rows=0,Number_Of_Columns=0;
 	public Java_Brain() {
 		CSV_DATA = new ArrayList<ArrayList<String>>();
+		this.Column_Info = new ArrayList<Column>();
 	}
 	
 	//Data Set Handling
+	/**
+	 * 
+	 * The method will import the data from the specified csv file
+	 * into the calling Java_Brain instance and render it as ready to use
+	 * in any of the models.
+	 *  
+	 * @param
+	 * CSV_PATH : A String instance which contains the path for the file ,valid 
+	 * path my be local paths on your system such as /bin/myfile.csv
+	 * or a URL of the files location for example https://www.mysource.com/files/data.csv
+	 * 
+	 * 
+	 * */
 	public void Load_CSV_File(String CSV_PATH) throws IOException {
 		 try {
 			 if(CSV_PATH.contains("www.") || CSV_PATH.contains("http:")|| CSV_PATH.contains("https:")) {
@@ -191,17 +205,27 @@ public class Java_Brain {
 			    
 			 }
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Error In File Openning");
 			e.printStackTrace();
 		}
 		 catch (IOException e) {
-				// TODO Auto-generated catch block
 				System.out.println("Error In File Openning");
 				e.printStackTrace();
 			}
 		 
 	}
+	/**
+	 * 
+	 * The method will export the data formed in the calling Java_Brain
+	 * instance to a CSV file in the project folder
+	 *  
+	 * @param
+	 * F_Name : A String instance which contains the name that will be given
+	 * to the saved CSV file . ( there is no need to add ".csv" at the end of
+	 * the file name)
+	 * 
+	 * 
+	 * */
 	public void Write_CSV(String F_Name) throws IOException {
 		FileWriter csvWriter = new FileWriter(F_Name + ".csv");
 			for(int i=0;i<this.Number_Of_Columns;i++) {
@@ -216,11 +240,19 @@ public class Java_Brain {
 
 		csvWriter.flush();
 		csvWriter.close();
+	
 	}
+	/**
+	 * The following method prints to the ide console all data in csv
+	 * keep in mid that large csv file may not be as informative when
+	 * printed to console
+	 * 
+	 */
 	public void Print_CSV_Data() {
+		
 		Iterator<String> itr;
-		for(int i=0;i<this.Column_Names.size();i++) {
-			System.out.print(Column_Names.get(i)+" ");
+		for(int i=0;i<this.Column_Info.size();i++) {
+			System.out.print(Column_Info.get(i).Column_Name+" ");
 		}
 		System.out.println();
 		for(int i = 0 ; i <CSV_DATA.size();i++) {
@@ -232,6 +264,14 @@ public class Java_Brain {
 			System.out.println(" ");
 		}
 	}
+	/**
+	 * the method will return an ArrayList of strings that
+	 * match the values in the row specified
+	 * @param
+	 * Row_Number : a positive integer > 0 and < number of rows total in the
+	 * CSV file
+	 * 
+	 * */
 	public ArrayList<String> Get_Specific_Row(int Row_Number) {
 		if(Row_Number < 0 || Row_Number > this.Number_Of_Rows) {
 			System.out.println("Invalid Row Number");
@@ -239,6 +279,14 @@ public class Java_Brain {
 		}
 		return this.CSV_DATA.get(Row_Number-1);
 	}
+	/**
+	 * the method will return an ArrayList of strings that
+	 * match the values in the column specified
+	 * @param
+	 * Column_Number : a positive integer > 0 and < number of columns total in the
+	 * CSV file
+	 * 
+	 * */
 	public ArrayList<String> Get_Specific_Column(int Column_Number){
 		if(Column_Number < 0 || Column_Number > this.Number_Of_Columns) {
 			System.out.println("Invalid Row Number");
@@ -254,6 +302,15 @@ public class Java_Brain {
 		return Spesific_Coulmn;
 		
 	}
+	/**
+	 * the method will return a String instance that matches the value
+	 * at the specified row and column
+	 * 
+	 * @param
+	 * Row : the row of the desired value
+	 * @param
+	 * Column : the column of the desired value
+	 * */
 	public String CSV_Get_Value(int Row,int Column) {
 		if(Row > this.Number_Of_Rows || Column > this.Number_Of_Columns || 
 			Row < 0 || Column < 0 ){
@@ -262,6 +319,18 @@ public class Java_Brain {
 		}
 		return CSV_DATA.get(Row-1).get(Column-1);
 	}
+	/**
+	 * the method will set the passed argument String to the specified position
+	 * as long as the specified position is  in range
+	 *  [1 - total number of rows /cols ]
+	 * @param
+	 * Row : the row of the desired position
+	 * @param
+	 * Column : the column of the desired position
+	 * @param
+	 * Value : a string instance which contains the Value that will be 
+	 * set in the specified position
+	 * */
 	public void CSV_Set_Value(int Row,int Column,String Value) {
 		if(Row > this.Number_Of_Rows || Column > this.Number_Of_Columns || 
 			Row < 0 || Column < 0 ){
@@ -283,9 +352,9 @@ public class Java_Brain {
 		Split.Number_Of_Rows = number_of_rows+1;
 		Split.Number_Of_Columns = this.Number_Of_Columns;
 		
-		Split.Column_Names=new ArrayList<String>();
-		for(int i=0;i<this.Column_Names.size();i++) {
-			Split.Column_Names.add(this.Column_Names.get(i));
+		Split.Column_Info = new ArrayList<Column>();
+		for(int i=0;i<this.Column_Info.size();i++) {
+			Split.Column_Info.add(this.Column_Info.get(i));
 		}
 		Split.CSV_DATA = new ArrayList<ArrayList<String>>();
 		
@@ -466,14 +535,17 @@ public class Java_Brain {
 	}
 	public void Add_Column(String Column_Name) {
 		this.Number_Of_Columns++;
-		this.Column_Names.add(Column_Name);
+		this.Column_Info.add(new Column());
+		this.Column_Info.get(this.Column_Info.size()-1).Column_Name = Column_Name;
 		for(int i=1;i<=this.Number_Of_Rows;i++) {
 			this.CSV_DATA.get(i-1).add("0");
 		}
-		
+		this.Refresh_Column_Info(this.Column_Info.size());
 	}
 	public void Add_Column(String Column_Name,ArrayList<String> Column_Values) {
 		this.Number_Of_Columns++;
+		this.Column_Info.add(new Column());
+		this.Column_Info.get(this.Column_Info.size()-1).Column_Name = Column_Name;
 		if(Column_Values.size()>this.Number_Of_Rows) {
 			int i =1;
 			while(i<=this.Number_Of_Rows) {
@@ -493,12 +565,10 @@ public class Java_Brain {
 				this.CSV_Set_Value(i+1, Number_Of_Columns, Column_Values.get(i));
 				
 			}
-			this.Column_Names.add(Column_Name);
-
+			
 			
 		}
 		else {
-			this.Column_Names.add(Column_Name);
 			for(int i=1;i<=this.Number_Of_Rows;i++) {
 				this.CSV_DATA.get(i-1).add(Column_Values.get(i-1));
 			}
@@ -528,7 +598,7 @@ public class Java_Brain {
 			this.CSV_DATA.get(i).remove(Column_Number-1);
 		}
 		this.Number_Of_Columns--;
-		this.Column_Names.remove(Column_Number-1);
+		this.Column_Info.remove(Column_Number-1);
 	}
 	public void Remove_Row(int Row_Number) {
 		if(Row_Number > this.Number_Of_Rows) {
@@ -552,9 +622,8 @@ public class Java_Brain {
 		int w = source.Cols;
 		int h = source.Rows;
 		for(int i =0;i<w;i++) {
-			output.Column_Names.add(" ");
+			output.Add_Column(" ");
 		}
-		output.Number_Of_Columns=w;
 		ArrayList<String> row = new ArrayList<String>();
 		for(int i =0;i<h;i++) {
 			for(int j=0;j<w;j++) {
@@ -789,11 +858,7 @@ public class Java_Brain {
 			LinkedHashSet<Integer> hashSet = new LinkedHashSet<>(Miss);
 	        ArrayList<Integer> listWithoutDuplicates = new ArrayList<>(hashSet);
 	        
-	        
-	        for(int i=0;i<listWithoutDuplicates.size();i++) {
-	        	System.out.println(listWithoutDuplicates.get(i));
-	        }
-	        
+	      
 	        for(int i=0;i<listWithoutDuplicates.size();i++) {
 	        	//System.out.println(listWithoutDuplicates.get(i)-(i));
 	        	this.Remove_Row(listWithoutDuplicates.get(i)-(i+1));
@@ -871,9 +936,11 @@ public class Java_Brain {
 		Java_Brain Cors = new Java_Brain();
 		
 		int number_of_correlations = Math.round(((numeric.size())*(numeric.size()-1))/2);
-		Cors.Number_Of_Columns =2;
-		Cors.Column_Names.add("Between");
-		Cors.Column_Names.add("Correlation");
+		Cors.Add_Column("Between");
+		Cors.Add_Column("Correlation");
+
+		//Cors.Column_Names.add(Between);
+		//Cors.Column_Names.add("Correlation");
 
 		for(int i =0;i<number_of_correlations;i++) {
 			Cors.Add_Row();
@@ -1637,7 +1704,7 @@ class Image_Tools{
 	public static Java_Brain Image_Pixels_To_CSV(char Channel,Image source) {
 		Java_Brain output = new Java_Brain();
 		for(int i=0;i<source.Image_Width;i++) {
-			output.Column_Names.add("1x"+i);
+			output.Add_Column("1x"+i);
 		}
 		output.Number_Of_Columns=source.Image_Width;
 		ArrayList<String> Row = new ArrayList<String>();
@@ -1681,7 +1748,7 @@ class Image_Tools{
 		int h = lab_matrix.length;
 		Java_Brain output = new Java_Brain();
 		for(int i=0;i<w;i++) {
-			output.Column_Names.add(String.format("0x%d",i ));
+			output.Add_Column(String.format("0x%d",i ));
 		}
 		
 		output.Number_Of_Columns=w;
