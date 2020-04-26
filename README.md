@@ -49,7 +49,7 @@ There are a few Deep Learning And Machine Learning Java libraries out there, but
 At that moment the idea to create a simple plug and play java classes which can be simply dragged into the src folder of any project and functionality of all the tools that the Java Brain library can be quickly and easily accessed and used.
 
 Here's Why Java Brain :brain: :
-* It As Simple As Drag And Drop and you are ready to code!
+* It's Simple As Drag And Drop and you are ready to code!
 * Function and methods are named meaningful names that way it is always clear what are the parameters or what does the method does!
 * CSV handling is all included in the library working with them made much easier trough java code!
 
@@ -105,6 +105,7 @@ Java Brain Offers you a method which is a part of the Neural_Net class which all
   * __Logistic Regression of binary variable as well as multivariable equations__
   * __Validation Of Logistic Regression - Confusion Matrix__
   * __K-Means calculation (up to 3-dimensional data variables)__
+  * __kNN - k Nearest Neighbors__
   * __Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use__
   * __Q Learning "Custom-fit" Class applicable for any use__
   * __Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models__
