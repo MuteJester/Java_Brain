@@ -91,6 +91,12 @@ the methods return the weights resulting after computing the optimal state using
 Java Brain Offers a fast and efficenet K-means calculation aglorithm although currently only up to 3 dimensional K - Means
 calculations supported soon there will a higher dimension support system.
 
+#### Ploting 2D K-Nearest-Neighbors Algorithm
+
+<img src="Examples/KNN_example.png-k=2.png" alt="Logo" width="600" height="600">
+Java Brain Offers a simple and dynamic kNN implementation aglorithm for all your use case as well as a quick
+plot method for immediate display of 2D kNN results. 
+
 #### Ploting User Designed Fully Connected Neural Network Topology
 
 <img src="Examples/FCNN-topology.png" alt="Logo" width="600" height="600">
