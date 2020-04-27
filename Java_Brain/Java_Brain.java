@@ -1203,7 +1203,7 @@ public class Java_Brain {
     	
     	return SCC;
 	}
-   
+    
     public double Get_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		double R_S = this.Get_Pearson_Correlation_Coefficient(Y, Y_Hat);
 		R_S*=R_S;
@@ -1386,6 +1386,35 @@ public class Java_Brain {
 		
 		return Final_Res;
 	}
+    public Matrix Get_Variance_Covariance_Matirx(int[] input_Columns) {
+    	
+    	Matrix data = new Matrix(this.Number_Of_Rows,input_Columns.length);
+    	Matrix dataOnes = new Matrix(this.Number_Of_Rows,1);
+    	for(int i=0;i<this.Number_Of_Rows;i++) {
+    			dataOnes.Matrix_Body[i][0]=1;
+    		
+    	}
+    	Matrix dataOnestag = new Matrix(dataOnes);
+    	dataOnestag.Matrix_Transpose();
+    	for(int i=1;i<=this.Number_Of_Rows;i++) {
+    		for(int j=0;j<input_Columns.length;j++) {
+    			data.Matrix_Body[i-1][j] = Double.parseDouble(this.CSV_Get_Value(i, input_Columns[j]));
+    		}
+    	}
+    	//transformation a = A - 11'x/n
+    	dataOnestag = dataOnes.Dot_Product(dataOnestag);
+    	dataOnestag = dataOnestag.Dot_Product(data);
+    	dataOnestag.Divide(this.Number_Of_Rows);
+    	data.Subtract(dataOnestag);
+    	dataOnes = new Matrix(data);
+    	dataOnes.Matrix_Transpose();
+    	//(a*a')/n 
+    	data = dataOnes.Dot_Product(data);
+    	data.Divide(Number_Of_Rows);
+    	
+    	return data;
+    	
+    }
 
 	private Matrix Step_Gradient(Matrix Current_Weights,double Learning_Rate ,int[] Columns_Of_Sampels,ArrayList<String> True_Y) {
 		int nof = Columns_Of_Sampels.length+1;
@@ -1542,7 +1571,32 @@ public class Java_Brain {
 
 			
 	}
+	public Matrix PCA(int[] Selected_Columns) {
+		double means[] = new double[Selected_Columns.length];
+		for(int i=0;i<Selected_Columns.length;i++) {
+			means[i] = this.Get_Column_Mean(Selected_Columns[i]);
+		}
+    	Matrix data = new Matrix(this.Number_Of_Rows,Selected_Columns.length);
 
+    	for(int i=1;i<=this.Number_Of_Rows;i++) {
+    		for(int j=0;j<Selected_Columns.length;j++) {
+    			data.Matrix_Body[i-1][j] = Double.parseDouble(this.CSV_Get_Value(i, Selected_Columns[j])) - means[j];
+    		}
+    	}
+    	Java_Brain tocsv = Java_Brain.Matrix_To_CSV(data);
+    	Matrix Var_CO_Var = tocsv.Get_Variance_Covariance_Matirx(Selected_Columns);
+    	
+    	Matrix EV = Var_CO_Var.Get_Eigen_Vectors();
+    	
+    	data = data.Dot_Product(EV);
+    	data.print_Matrix();
+
+    	
+    	
+		
+		
+		return data;
+	}
 	
 	
 	//Visual
@@ -1580,7 +1634,8 @@ public class Java_Brain {
 		data_plot.Show_Image();
 		
 	}
-    public void Plot_Scatter_Plot(ArrayList<Point> Data,String X_Name,String Y_Name) {
+    public void Plot_Scatter_Plot(int Column_X,int Column_Y,String X_Name,String Y_Name) {
+    	ArrayList<Point> Data = this.Column_To_Point_List(Column_X, Column_Y);
     	plot.Show_Scatter_Plot(Data, X_Name, Y_Name);
     }
     public void Plot_Gradient_Descent(int X_values_column,int Y_values_column,double Leaning_Rate,int number_of_iterations) {
@@ -1729,36 +1784,105 @@ public class Java_Brain {
 		rg.Show_Image();
 		
     }
-    public Matrix Get_Variance_Covariance_Matirx(int[] input_Columns) {
-    	
-    	Matrix data = new Matrix(this.Number_Of_Rows,input_Columns.length);
-    	Matrix dataOnes = new Matrix(this.Number_Of_Rows,1);
-    	for(int i=0;i<this.Number_Of_Rows;i++) {
-    			dataOnes.Matrix_Body[i][0]=1;
+    public void Plot_Quick_KNN(int K ,double Test_Values[],int Sample_Columns[]) {
+    	if(Sample_Columns.length>2) {
+    		System.out.println("Quick Plot Supports Only 2 Sample Column Plots");
+    	}
+    	ArrayList<Point> data = this.Column_To_Point_List(Sample_Columns[0], Sample_Columns[1]);
+		Image Scatter_Plot = new Image();
+		Color_Palette CSET = new Color_Palette();
+		Math_Toolbox tlb = new Math_Toolbox();
+		double Max_X = Double.MIN_VALUE,Max_Y = Double.MIN_VALUE;
+		double Min_X = Double.MAX_VALUE,Min_Y = Double.MAX_VALUE;
+
+		for(int i = 0 ;i<data.size();i++) {
+			if(data.get(i).x > Max_X) {
+				Max_X = data.get(i).x;
+			}
+			if(data.get(i).x < Min_X) {
+				Min_X = data.get(i).x;
+			}
+			if(data.get(i).y > Max_Y) {
+				Max_Y = data.get(i).y;
+			}
+			if(data.get(i).y < Min_Y) {
+				Min_Y = data.get(i).y;
+			}
+		}
+		Max_X+=Max_X/4;
+		Max_Y+=Max_Y/4;
+		Max_X = Math.round(Max_X);
+		Max_Y = Math.round(Max_Y);
+		Scatter_Plot.Load_Blank_Canvas(650, 800, CSET.White_Smoke);
+		Scatter_Plot.Draw_Square(75, 100, 575, 725, CSET.Black, "Corners");
+		Scatter_Plot.Draw_Square(74, 99, 576, 726, CSET.Black, "Corners");
+		Scatter_Plot.Draw_Square(73, 98, 577, 727, CSET.Black, "Corners");
+		Scatter_Plot.Draw_Text(325, 750, "Y", CSET.Black);
+		Scatter_Plot.Draw_Text(65, 400, "X", CSET.Black);
+		double distX = (Math.abs(Min_X)+Math.abs(Max_X))/4;
+		double distY = (Math.abs(Min_Y)+Math.abs(Max_Y))/4;
+
+		Scatter_Plot.Draw_Text(595, 90 + 0 * 78*2,String.format("%.2f",((Min_X))), CSET.Black);
+		Scatter_Plot.Draw_Text(595, 99 + 1 * 78*2,String.format("%.2f",((Min_X)+distX*1)), CSET.Black);
+		Scatter_Plot.Draw_Text(595, 99 + 2 * 78*2,String.format("%.2f",((Min_X)+distX*2)), CSET.Black);
+		Scatter_Plot.Draw_Text(595, 99 + 3 * 78*2,String.format("%.2f",((Min_X)+distX*3)), CSET.Black);
+		Scatter_Plot.Draw_Text(595, 99 + 4 * 78*2,String.format("%.2f",((Max_X))), CSET.Black);
+
+		Scatter_Plot.Draw_Text(575 - 0 * 62*2, 40,String.format("%.2f",(Min_Y)), CSET.Black);
+		Scatter_Plot.Draw_Text(575 - 1 * 62*2, 40,String.format("%.2f",((Min_Y)+distY*1)), CSET.Black);
+		Scatter_Plot.Draw_Text(575 - 2 * 62*2, 40,String.format("%.2f",((Min_Y)+distY*2)), CSET.Black);
+		Scatter_Plot.Draw_Text(575 - 3 * 62*2, 40,String.format("%.2f",((Min_Y)+distY*3)), CSET.Black);
+		Scatter_Plot.Draw_Text(575 - 4 * 62*2, 40,String.format("%.2f",((Max_Y))), CSET.Black);
+
+		for(int i = 0 ;i<5;i++) {
+			Scatter_Plot.Draw_Line(575 - 62 * i*2,100,575 - 62 * i*2,90,CSET.Black);
+			
+			Scatter_Plot.Draw_Line(575,100 + i * 78*2 ,575 + 10,100 + i * 78*2,CSET.Black);
+			Scatter_Plot.Draw_Line(575,99 + i * 78*2 ,575 + 10,99 + i * 78*2,CSET.Black);
+
+
+
+		}
+		double tx,ty;
+		Point b;
+		Scatter_Plot.Update_Pixel_Matrix();
+		for(int i = 0 ;i<data.size();i++) {
+			b = data.get(i);
+			tx = tlb.Remap((float)b.x, (float)Min_X, (float)Max_X, 105, 720 );
+			ty = tlb.Remap((float)b.y, (float)Min_Y, (float)Max_Y, 565, 80);
+			
+			Scatter_Plot.Draw_Circle((int)tx, (int)ty, 3, CSET.Royal_Blue,"Fill");
+			Scatter_Plot.Draw_Circle((int)tx, (int)ty, 4, CSET.White_Smoke);
+
+
+		
+		}
+		
+		Scatter_Plot.Commint_Matrix_Changes();
+		Matrix Knn = this.KNN(K, Test_Values, Sample_Columns);
+		tx = tlb.Remap((float)Test_Values[0], (float)Min_X, (float)Max_X, 105, 720 );
+		ty = tlb.Remap((float)Test_Values[1], (float)Min_Y, (float)Max_Y, 565, 80);
+		Scatter_Plot.Draw_Circle((int)tx, (int)ty, 6, CSET.Red,"Fill");
+		Scatter_Plot.Draw_Circle((int)tx, (int)ty, 4, CSET.White_Smoke,"Fill");
+		Scatter_Plot.Draw_Circle((int)tx, (int)ty, 2, CSET.Green,"Fill");
+
+
+
+    	for(int i=0;i<K;i++) {
+    		double Nx = Double.parseDouble(this.CSV_Get_Value((int)Knn.Matrix_Body[i][0], Sample_Columns[0]));
+    		double Ny = Double.parseDouble(this.CSV_Get_Value((int)Knn.Matrix_Body[i][0], Sample_Columns[1]));
+			tx = tlb.Remap((float)Nx, (float)Min_X, (float)Max_X, 105, 720 );
+			ty = tlb.Remap((float)Ny, (float)Min_Y, (float)Max_Y, 565, 80);
+
+			Scatter_Plot.Draw_Circle((int)tx, (int)ty, 5, CSET.White_Smoke,"Fill");
+			Scatter_Plot.Draw_Circle((int)tx, (int)ty, 4, CSET.Hot_Pink,"Fill");
+
     		
     	}
-    	Matrix dataOnestag = new Matrix(dataOnes);
-    	dataOnestag.Matrix_Transpose();
-    	for(int i=1;i<=this.Number_Of_Rows;i++) {
-    		for(int j=0;j<input_Columns.length;j++) {
-    			data.Matrix_Body[i-1][j] = Double.parseDouble(this.CSV_Get_Value(i, input_Columns[j]));
-    		}
-    	}
-    	//transformation a = A - 11'x/n
-    	dataOnestag = dataOnes.Dot_Product(dataOnestag);
-    	dataOnestag = dataOnestag.Dot_Product(data);
-    	dataOnestag.Divide(this.Number_Of_Rows);
-    	data.Subtract(dataOnestag);
-    	dataOnes = new Matrix(data);
-    	dataOnes.Matrix_Transpose();
-    	//(a*a')/n 
-    	data = dataOnes.Dot_Product(data);
-    	data.Divide(Number_Of_Rows);
+    	Scatter_Plot.Show_Image();
     	
-    	return data;
     	
     }
-
 
 
 

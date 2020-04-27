@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -190,6 +189,17 @@ class Matrix {
 			this.Rows = R;
 			this.Cols = C;
 		}
+		else if(Type.equals("Ones")) {
+				Matrix_Body = new double[R][C]; 
+				for (int i = 0; i < R; i++) {
+					for (int j = 0; j < C; j++) {
+							Matrix_Body[i][j] = 1;
+					}
+				}
+				this.Rows = R;
+				this.Cols = C;
+			}
+		
 		
 		}
 	public Matrix(double matrix[][],int rows,int cols) {
@@ -420,8 +430,96 @@ class Matrix {
 
 		
 	}
-	public void QR_Decomposition() {
-		
+	public Matrix[] QR_Decomposition() {
+		Matrix QR = new Matrix(this);
+	   double[] R_diagonal = new double[this.Rows];
+	   
+	   for (int k = 0; k < this.Rows; k++) {
+	         double nrm = 0;
+	         for (int i = k; i < this.Cols; i++) {
+	            nrm = Math.sqrt( Math.pow(nrm, 2) + Math.pow(QR.Matrix_Body[i][k], 2) );
+	         }
+
+	         if (nrm != 0.0) {
+	            if (QR.Matrix_Body[k][k] < 0) {
+	               nrm = -nrm;
+	            }
+	            for (int i = k; i < this.Cols; i++) {
+	               QR.Matrix_Body[i][k] /= nrm;
+	            }
+	            QR.Matrix_Body[k][k] += 1.0;
+
+	            for (int j = k+1; j < this.Cols; j++) {
+	               double s = 0.0; 
+	               for (int i = k; i < this.Cols; i++) {
+	                  s += QR.Matrix_Body[i][k]*QR.Matrix_Body[i][j];
+	               }
+	               s = -s/QR.Matrix_Body[k][k];
+	               for (int i = k; i < this.Cols; i++) {
+	                  QR.Matrix_Body[i][j] += s*QR.Matrix_Body[i][k];
+	               }
+	            }
+	         }
+	         R_diagonal[k] = -nrm;
+	      }
+	   
+	   int m = this.Rows;
+	   int n = this.Cols;
+	   Matrix XQ = new Matrix(m,n);
+	      double[][] Q = new double[m][n];
+	      for (int k = n-1; k >= 0; k--) {
+	         for (int i = 0; i < m; i++) {
+	            Q[i][k] = 0.0;
+	         }
+	         Q[k][k] = 1.0;
+	         for (int j = k; j < n; j++) {
+	            if (QR.Matrix_Body[k][k] != 0) {
+	               double s = 0.0;
+	               for (int i = k; i < m; i++) {
+	                  s += QR.Matrix_Body[i][k]*Q[i][j];
+	               }
+	               s = -s/QR.Matrix_Body[k][k];
+	               for (int i = k; i < m; i++) {
+	                  Q[i][j] += s*QR.Matrix_Body[i][k];
+	               }
+	            }
+	         }
+	      }
+	      XQ.Matrix_Body = Q;
+	      Matrix XR = new Matrix(n,n);
+	      double[][] R = new double[n][n];
+	      for (int i = 0; i < n; i++) {
+	         for (int j = 0; j < n; j++) {
+	            if (i < j) {
+	               R[i][j] = QR.Matrix_Body[i][j];
+	            } else if (i == j) {
+	               R[i][j] = R_diagonal[i];
+	            } else {
+	               R[i][j] = 0.0;
+	            }
+	         }
+	      }
+	      XR.Matrix_Body = R;
+	      
+	      Matrix Xh = new Matrix(m,n);
+	      double[][] H =new double[m][n];
+	      for (int i = 0; i < m; i++) {
+	         for (int j = 0; j < n; j++) {
+	            if (i >= j) {
+	               H[i][j] = QR.Matrix_Body[i][j];
+	            } else {
+	               H[i][j] = 0.0;
+	            }
+	         }
+	      }
+	      Xh.Matrix_Body=H;
+	      Matrix[] Result = new Matrix[3];
+	      
+	      Result[0] = XQ;
+	      Result[1] = XR;
+	      Result[2] = Xh;
+	      return Result;
+	   
 	}
 	public double Get_Determinant() {
 		if(this.Cols!=this.Rows) {
@@ -440,6 +538,77 @@ class Matrix {
 	    else
 	        return -det;
 	
+	}
+	public double[] Get_Eigen_Values() {
+		Matrix CopyOfOriginal = new Matrix(this);
+		Matrix A = new Matrix(this);
+		Matrix[] QR = this.QR_Decomposition();
+		for(int i =0; i<20;i++) {
+			A = QR[1].Dot_Product(QR[0]);
+			this.Matrix_Body=A.Matrix_Body;
+			QR = this.QR_Decomposition();
+		}
+		
+		double[] EigenValues = this.Get_Diagonal();
+		this.Matrix_Body=CopyOfOriginal.Matrix_Body;
+		return EigenValues;
+		
+	}
+	public Matrix Get_Eigen_Vectors() {
+		Matrix CopyOfOriginal = new Matrix(this);
+		Matrix A = new Matrix(this);
+		Matrix[] QR = this.QR_Decomposition();
+		Matrix Q = new Matrix(QR[0]);
+		
+		for(int i =0; i<30;i++) {
+			A = QR[1].Dot_Product(QR[0]);
+			this.Matrix_Body=A.Matrix_Body;
+			QR = this.QR_Decomposition();
+			Q = Q.Dot_Product(QR[0]);
+
+
+		}
+
+		this.Matrix_Body=CopyOfOriginal.Matrix_Body;
+		return Q;
+		
+	}
+	public double[] Gaussian_Elimination(double[] equals_to) {
+		int n = this.Matrix_Body[0].length;		
+        for (int p = 0; p < n; p++) {
+            int max = p;
+            for (int i = p + 1; i < n; i++) {
+                if (Math.abs(this.Matrix_Body[i][p]) > Math.abs(this.Matrix_Body[max][p])) {
+                    max = i;
+                }
+            }
+            double[] temp = this.Matrix_Body[p];
+            this.Matrix_Body[p] = this.Matrix_Body[max];
+            this.Matrix_Body[max] = temp;
+            double t = equals_to[p];
+            equals_to[p] = equals_to[max];
+            equals_to[max] = t;
+            if (Math.abs(this.Matrix_Body[p][p]) <= Double.MIN_VALUE) {
+                throw new ArithmeticException("Matrix is singular or nearly singular");
+            }
+            for (int i = p + 1; i < n; i++) {
+                double alpha = this.Matrix_Body[i][p] / this.Matrix_Body[p][p];
+                equals_to[i] -= alpha * equals_to[p];
+                for (int j = p; j < n; j++) {
+                	this.Matrix_Body[i][j] -= alpha * this.Matrix_Body[p][j];
+                }
+            }
+        }
+        double[] x = new double[n];
+        for (int i = n - 1; i >= 0; i--) {
+            double sum = 0.0;
+            for (int j = i + 1; j < n; j++) {
+                sum += this.Matrix_Body[i][j] * x[j];
+            }
+            x[i] = (equals_to[i] - sum) / this.Matrix_Body[i][i];
+        }
+        
+        return x;
 	}
 	public void Matrix_Transpose() {
 
@@ -8595,7 +8764,10 @@ class LibCharacters {
 
 
 class SPlot extends Image{
-	
+	public double Last_Known_Max_X;
+	public double Last_Known_Max_Y;
+	public double Last_Known_Min_X;
+	public double Last_Known_Min_Y;
 	public void Show_Bar_Plot(ArrayList<Integer> data, ArrayList<String> Categories) {
 		Color_Palette CSET = new Color_Palette();
 		Math_Toolbox tlb = new Math_Toolbox();
@@ -9096,6 +9268,11 @@ class SPlot extends Image{
 		Scatter_Plot.Draw_Text(575 - 4 * 62*2, 40,String.format("%.2f",((Max_Y))), CSET.Black);
 
 
+		this.Last_Known_Max_X=Max_X;
+		this.Last_Known_Max_Y=Max_Y;
+		this.Last_Known_Min_X=Min_X;
+		this.Last_Known_Min_X=Min_Y;
+
 		for(int i = 0 ;i<5;i++) {
 			Scatter_Plot.Draw_Line(575 - 62 * i*2,100,575 - 62 * i*2,90,CSET.Black);
 			
@@ -9178,7 +9355,19 @@ class SPlot extends Image{
 		return Scatter_Plot;
 		
 	}
+	public void Add_Point_Scatter_Plot(Image Plot,int Radius,Pixel Color,double X_pos,double Y_pos) {
+		double tx,ty;
+		Color_Palette CSET = new Color_Palette();
+		Math_Toolbox tlb = new Math_Toolbox();
+		Plot.Update_Pixel_Matrix();
+			tx = tlb.Remap((float)X_pos, (float)this.Last_Known_Min_X, (float)this.Last_Known_Max_X, 105, 720 );
+			ty = tlb.Remap((float)Y_pos, (float)this.Last_Known_Min_Y, (float)this.Last_Known_Max_Y, 565, 80);
+			
+			Plot.Draw_Circle((int)tx, (int)ty, Radius+1, CSET.White_Smoke,"Fill");
+			Plot.Draw_Circle((int)tx, (int)ty, Radius, Color,"Fill");
 
+			Plot.Commint_Matrix_Changes();
+	}
 	public void Show_Pie_Plot(double Sizes[],ArrayList<String> Labels) {
 		if(Labels.size() != Sizes.length) {
 			System.out.println("Number Of Labels And Number Of Sizes Do Not Match");
