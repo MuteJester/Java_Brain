@@ -96,6 +96,7 @@ calculations supported soon there will a higher dimension support system.
 <img src="Examples/KNN_example.png" alt="Logo" width="600" height="600">
 Java Brain Offers a simple and dynamic kNN implementation aglorithm for all your use case as well as a quick
 plot method for immediate display of 2D kNN results. 
+In the above image- the red ciricle with the green dot in the center is the new added value, blue points that turned pink are the specified K nearest neighbors.
 
 #### Ploting User Designed Fully Connected Neural Network Topology
 
