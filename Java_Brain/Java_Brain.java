@@ -340,6 +340,18 @@ public class Java_Brain {
 		 CSV_DATA.get(Row-1).set(Column-1, Value);
 		 
 	}
+	/**
+	 * the method splits the data in the calling Java_Brain instance into two parts
+	 * returning the amount stated in the function call parameter .
+	 * Example: if Split_Percentage = 30, then 70% of the data will be left as is in
+	 * the current Java_Brain instance and from the 70% mark till the end will be
+	 * removed and returned as a new Java_Brain instance containing the removed data.
+	 * @param 
+	 * Split_Percentage : the percentage of data that will be disconnected.
+	 * @return
+	 *  A new Java_Brain instance containing the removed data.
+	 * 
+	 * */
 	public Java_Brain Split_Data_Set(int Split_Percentage) {
 		if(Split_Percentage > 100) {
 			System.out.println("Cannot Split Into: " + (100 - Split_Percentage) +"%  /  " + Split_Percentage + "% ");
@@ -374,6 +386,24 @@ public class Java_Brain {
 		return Split;
 		
 	}
+	/**
+	 * the method takes 2 numbers representing columns and inserts the numeric values 
+	 * in those columns into an ArrayList of Point objects , each Point object in the 
+	 * ArrayList represents a Row in the loaded data set and the 2 values of the columns passed to
+	 * the function , meaning if the parameters (4,5) passed to the method,
+	 * the ArrayList returned in any given index 'I' represents the 'I'th row of the loaded
+	 * CSV file and the Point object at the 'I'th position will hold both values of the 4 and 5 column
+	 * at that row. 
+	 * @param
+	 * Column_X : The number of the column that will be represented as the X value inside 
+	 * each Point Instances
+	 * @param
+	 * Column_Y : The number of the column that will be represented as the Y value inside 
+	 * each Point Instances
+	 * @return
+	 * An ArrayList of Point objects 
+	 * 
+	 * */
 	public ArrayList<Point> Column_To_Point_List(int Column_X,int Column_Y){
 		ArrayList<String> X = this.Get_Specific_Column(Column_X);
 		ArrayList<String> Y = this.Get_Specific_Column(Column_Y);
@@ -384,6 +414,24 @@ public class Java_Brain {
 		return p;
 		
 	}
+	/**
+	 * the method takes 2 ArrayLists representing columns and inserts the numeric values 
+	 * in those columns into an ArrayList of Point objects , each Point object in the 
+	 * ArrayList represents a Row in the loaded data set and the 2 values of the columns passed to
+	 * the function , meaning if the parameters (4,5) passed to the method,
+	 * the ArrayList returned in any given index 'I' represents the 'I'th row of the loaded
+	 * CSV file and the Point object at the 'I'th position will hold both values of the 4 and 5 column
+	 * at that row. 
+	 * @param
+	 * X_Values : An ArrayList of Strings that holds the values of the column that will set as the X value inside 
+	 * each Point Instances
+	 * @param
+	 * Y_Values : An ArrayList of Strings that holds the values of the column that will set as the Y value inside 
+	 * each Point Instances
+	 * @return
+	 * An ArrayList of Point objects 
+	 * 
+	 * */
 	public ArrayList<Point> Column_To_Point_List(ArrayList<String> X_Values, ArrayList<String> Y_Values){
 		ArrayList<Point> p = new ArrayList<Point>();
 		for(int i =0;i<this.Number_Of_Rows;i++) {
@@ -392,6 +440,27 @@ public class Java_Brain {
 		return p;
 		
 	}
+	/**
+	 * the method takes 3 numbers representing columns and inserts the numeric values 
+	 * in those columns into an ArrayList of Point objects , each Point object in the 
+	 * ArrayList represents a Row in the loaded data set and the 3 values of the columns passed to
+	 * the function , meaning if the parameters (4,5,8) passed to the method,
+	 * the ArrayList returned in any given index 'I' represents the 'I'th row of the loaded
+	 * CSV file and the Point object at the 'I'th position will hold both values of the 4,5 and 8 column
+	 * at that row. 
+	 * @param
+	 * Column_X : The number of the column that will be represented as the X value inside 
+	 * each Point Instances
+	 * @param
+	 * Column_Y : The number of the column that will be represented as the Y value inside 
+	 * each Point Instances
+	 *  * @param
+	 * Column_Z : The number of the column that will be represented as the Z value inside 
+	 * each Point Instances
+	 * @return
+	 * An ArrayList of Point objects 
+	 * 
+	 * */
 	public ArrayList<Point> Column_To_Point_List(int Column_X,int Column_Y,int Column_Z){
 		ArrayList<String> X = this.Get_Specific_Column(Column_X);
 		ArrayList<String> Y = this.Get_Specific_Column(Column_Y);
@@ -402,6 +471,27 @@ public class Java_Brain {
 		}
 		return p;
 	}
+	/**
+	 * the method takes 3 ArrayLists representing columns and inserts the numeric values 
+	 * in those columns into an ArrayList of Point objects , each Point object in the 
+	 * ArrayList represents a Row in the loaded data set and the 3 values of the columns passed to
+	 * the function , meaning if the parameters (4,5,8) passed to the method,
+	 * the ArrayList returned in any given index 'I' represents the 'I'th row of the loaded
+	 * CSV file and the Point object at the 'I'th position will hold both values of the 4,5 and 8 column
+	 * at that row. 
+	 * @param
+	 * X_Values : An ArrayList of Strings that holds the values of the column that will set as the X value inside 
+	 * each Point Instances
+	 * @param
+	 * Y_Values : An ArrayList of Strings that holds the values of the column that will set as the Y value inside 
+	 * each Point Instances
+	 *  @param
+	 * Z_Values : An ArrayList of Strings that holds the values of the column that will set as the Y value inside 
+	 * each Point Instances
+	 * @return
+	 * An ArrayList of Point objects 
+	 * 
+	 * */
 	public ArrayList<Point> Column_To_Point_List(ArrayList<String> X_Values, ArrayList<String> Y_Values,ArrayList<String> Z_Values){
 		ArrayList<Point> p = new ArrayList<Point>();
 		for(int i =0;i<this.Number_Of_Rows;i++) {

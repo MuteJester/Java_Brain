@@ -12,6 +12,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -771,87 +773,6 @@ class SIPL_Window extends JFrame{
 }
 	
 }
-
-class Space_Point {
-	String Name;
-	Point Coordinate;
-}
-class Space_Edge {
-	int Index_A;
-	int Index_B;
-	Pixel EdgeColor;
-	
-}
-class Cartesian_Coordinate_System {
-protected boolean Colored;
-
- public ArrayList<Space_Point> Coordinates;
- public ArrayList<Space_Edge>  Edges;
-	Cartesian_Coordinate_System() {
-		Coordinates = new  ArrayList<Space_Point>();
-		Edges = new  ArrayList<Space_Edge>();
-
-		Colored = false;
-	};
-	public void Add_Point(double x, double y, double z, String name) {
-		Space_Point temp = new Space_Point();
-		temp.Name = name;
-		temp.Coordinate.x = x;
-		temp.Coordinate.y = y;
-		temp.Coordinate.z = z;
-		Coordinates.add(temp);
-	}
-	public boolean Add_Edge(String nameA,String nameB) {
-		Space_Edge temp = new Space_Edge() ;
-		boolean Aauth = false, Bauth = false;
-		for (int i = 0; i < Coordinates.size();i++) {
-			if (Coordinates.get(i).Name.equals(nameA)) {
-				temp.Index_A = i;
-				Aauth = true;
-				
-			}
-			else if (Coordinates.get(i).Name.equals(nameB)) {
-				temp.Index_B = i;
-				Bauth = true;
-			
-			}
-			if (Aauth == true && Bauth == true) {
-				Edges.add(temp);
-				return true;
-				
-			}
-
-		}
-		return false;
-	}
-	public boolean Add_Edge(String nameA,String nameB,Pixel EdgeColor) {
-		Space_Edge temp = new Space_Edge();
-		Colored = true;
-		boolean Aauth = false, Bauth = false;
-		for (int i = 0; i < Coordinates.size(); i++) {
-			if (Coordinates.get(i).Name.equals(nameA)) {
-				temp.Index_A = i;
-				Aauth = true;
-
-			}
-			else if (Coordinates.get(i).Name.equals(nameB)) {
-				temp.Index_B = i;
-				Bauth = true;
-
-			}
-			if (Aauth == true && Bauth == true) {
-				Edges.add(temp);
-				Edges.get(i).EdgeColor = EdgeColor;
-				return true;
-
-			}
-
-		}
-		return false;
-	}
-	
-
-}
 class SIPL_3D_Window extends JFrame{
 	private static final long serialVersionUID = 1L;
 	BufferedImage IMG;
@@ -859,22 +780,22 @@ class SIPL_3D_Window extends JFrame{
 	Point RotationAngle = new Point(0,0,0);
 	Point Teta = new Point(0,0,0);
 	Point E = new Point(0,0,0);
-
+	Color_Palette CSET = new Color_Palette();
+	Image Background;
 	JLabel label;
 	SIPL_3D_Window(){
-
-	}
-	SIPL_3D_Window(BufferedImage img){
-		this.IMG = img;
-		//Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Background = new Image();
+		Background.Load_Blank_Canvas(600, 600,CSET.White_Smoke );
 		label=new JLabel();
+		IMG = Background.IMG;
 	    label.setIcon((Icon) new ImageIcon(IMG));
 	    this.getContentPane().add(label,BorderLayout.CENTER);
 	    //this.setLocationRelativeTo(null);
 	    this.setSize(IMG.getWidth(), IMG.getHeight());
 		this.setVisible(true);
 		this.setLayout(null);
-	}	
+	
+	}
 	public void rotateAZ(double theta,Point Cord) {
 		double sinTheta = Math.sin(theta);
 		double cosTheta = Math.cos(theta);
@@ -2632,10 +2553,16 @@ public class Image {
 	}
     public void Load_Image(String FilePath) throws IOException {
 		try {
+			if(FilePath.contains("http://")||FilePath.contains("https://")||FilePath.contains("www.")) {
+				this.F_Path = FilePath;
+				URL url = new URL(FilePath);
+				this.IMG = ImageIO.read(url);
+				this.Image_Load_Wrapper();
+			}else {
 			this.F_Path = FilePath;
-		this.IMG = ImageIO.read(Image.class.getResource(FilePath));
-		//this.IMG = ImageIO.read(new File(FilePath));
-		this.Image_Load_Wrapper();
+			this.IMG = ImageIO.read(Image.class.getResource(FilePath));
+			this.Image_Load_Wrapper();
+			}
 		}catch(IOException e) {
 			System.out.println("Error");
 		}
@@ -6948,6 +6875,25 @@ public class Image {
 		this.Pixel_Matrix = padded.Pixel_Matrix;
 		this.Commint_Matrix_Changes();
 	}
+	/**
+	 * @implNote
+	 * Median_Filter
+	 * @implNote
+	 * Mean_Blur
+	 * @implNote
+	 * Gaussian_Blur
+	 * @implNote
+	 * Low_Pass
+	 * @implNote
+	 * High_Pass
+	 * @implNote
+	 * High_Pass_Streached
+	 * @implNote
+	 * Unsharp_Mask
+	 * @implNote
+	 * Sobel_Kernel
+	 * 
+	 * */
 	public void Image_Convolution(String Mode) {
 		if(Mode.equals("Median_Filter")) {
 			int GroupR[] = new int[9];
