@@ -52,7 +52,7 @@ Here's Why Java Brain :brain: :
 * It's Simple As Drag And Drop and you are ready to code!
 * Function and methods are named meaningful names that way it is always clear what are the parameters or what does the method does!
 * CSV handling is all included in the library working with them made much easier trough java code!
-
+* Developing complex matrix algorithms ? we got you covered with a dynamic Matrix class filled with quick usful methods strating from eigen value/vector extraction trough basic operations up to decompositions.
 ### Built With
 * [Eclipse](https://www.eclipse.org/)
 * [Inetlij](https://www.jetbrains.com/)
@@ -93,7 +93,7 @@ calculations supported soon there will a higher dimension support system.
 
 #### Ploting 2D K-Nearest-Neighbors Algorithm
 
-<img src="Examples/KNN_example.png-k=2.png" alt="Logo" width="600" height="600">
+<img src="Examples/KNN_example.png" alt="Logo" width="600" height="600">
 Java Brain Offers a simple and dynamic kNN implementation aglorithm for all your use case as well as a quick
 plot method for immediate display of 2D kNN results. 
 
