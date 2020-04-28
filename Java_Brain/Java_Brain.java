@@ -500,6 +500,14 @@ public class Java_Brain {
 		return p;
 		
 	}
+	/**
+	 * The method takes an arraylist of doubles and formats each one of them into a string 
+	 * making an arraylist of strings  
+	 * @param
+	 * 	to_convert : An ArrayList of doubles needed to be converted to and ArrayList of strings
+	 * @return
+	 * 	An ArrayList of strings 
+	 * */
 	public ArrayList<String> DoubleList_To_StringList(ArrayList<Double> to_convert){
 		ArrayList<String> res= new ArrayList<String>();
 		for(int i =0;i<to_convert.size();i++) {
@@ -507,6 +515,14 @@ public class Java_Brain {
 		}
 		return res;
 	}
+	/**
+	 * The method takes an arraylist of strings and parses each one of them into a double 
+	 * making an arraylist of double  
+	 * @param
+	 * 	to_convert : An ArrayList of strings needed to be parsed to and ArrayList of doubles
+	 * @return
+	 * 	An ArrayList of doubles 
+	 * */
 	public ArrayList<Double> StringList_To_DoubleList(ArrayList<String> to_convert){
 		ArrayList<Double> res= new ArrayList<Double>();
 		for(int i =0;i<to_convert.size();i++) {
@@ -514,6 +530,19 @@ public class Java_Brain {
 		}
 		return res;
 	}
+	/**
+	 * The method runs during the constructor phase and when Refresh_Info method is called
+	 * this method determinates the type of the column corresponding to the number passed to the method
+	 * as a parameter .
+	 * there are 4 types which the method tries to determinate:
+	 * Numeric - a column that contains strictly integers/floats/doubles
+	 * Categorical - a column which consists of a small finite amount of strings or categories 
+	 * which repeat themselves trough out the column (for example - High/Medium/Low or Yes/No )
+	 * @param
+	 * Column_Number : the number of the column on which to run the methods
+	 * @return
+	 * An Integer [0-3]  each integer is a certain state 
+	 * */
 	private int Determinate_Column_Type(int Column_Number) {
 		boolean numeric = true;
 		ArrayList<String> Categories = new ArrayList<String>();
@@ -574,6 +603,13 @@ public class Java_Brain {
 		//else set as text
 		return 2;
 	}
+	/**
+	 * The method rescans the column passed as a parameter and updates 
+	 * all the Column information of the requested column.
+	 * @param
+	 * Column_Number : the number of the column on which to run the method
+	 * 
+	 * */
 	public void Refresh_Column_Info(int Column_Number) {
 		Column t = this.Column_Info.get(Column_Number-1);
 		t.Type = this.Determinate_Column_Type(Column_Number);
@@ -603,6 +639,13 @@ public class Java_Brain {
 		
 		
 	}
+	/**
+	 * The method will print to ide console all the column information of the loaded csv file in the calling
+	 * Java_Brain instance
+	 * for each column the following information will be printed:
+	 * Column Number , Column Name , Column Type (if categorical then the categories will be printed as well),
+	 * Number of missing values in the column.
+	 * */
 	public void Print_CSV_Column_Info() {
 		for(int i=1;i<=this.Number_Of_Columns;i++) {
 			System.out.println("=============================");
@@ -623,6 +666,13 @@ public class Java_Brain {
 			
 		}
 	}
+	/**
+	 * The method will add a new column with the name specified in the parameters to the loaded 
+	 * Csv file inside the calling Java_Brain instance.
+	 * the new column will be by default filled with zeros.
+	 * @param
+	 * Column_Name : the name that will be given to the column.
+	 * */
 	public void Add_Column(String Column_Name) {
 		this.Number_Of_Columns++;
 		this.Column_Info.add(new Column());
@@ -632,6 +682,17 @@ public class Java_Brain {
 		}
 		this.Refresh_Column_Info(this.Column_Info.size());
 	}
+	/**
+	 * The method will add a new column with the name specified in the parameters to the loaded 
+	 * Csv file inside the calling Java_Brain instance.
+	 * the new column will contain the values in the ArrayList of strings passed as a parameter to this method 
+	 * if there is a smaller amount of values in the passed ArrayList then the amount of current rows in the file
+	 * all missing values from the end of passed ArrayList up to the amount of rows in the loaded file will be filled with zeros.
+	 * @param
+	 * Column_Name : the name that will be given to the column.
+	 * @param
+	 * Column_Values : the values that will in the newly created column.
+	 * */
 	public void Add_Column(String Column_Name,ArrayList<String> Column_Values) {
 		this.Number_Of_Columns++;
 		this.Column_Info.add(new Column());
@@ -664,6 +725,9 @@ public class Java_Brain {
 			}
 		}
 	}
+	/**
+	 * The method will add a new row of '0' to the csv data loaded in the calling Java_Brain instance
+	 * */
 	public void Add_Row() {
 		this.Number_Of_Rows++;
 		this.CSV_DATA.add(new ArrayList<String>());
@@ -671,6 +735,13 @@ public class Java_Brain {
 			this.CSV_DATA.get(Number_Of_Rows-1).add("0");
 		}
 	}
+	/**
+	 * The method will add a new row containing the values in the ArrayList passed to the method 
+	 * please keep in mind that if the length of the row is longer then the amount of columns
+	 * Currently loaded in the Java_Brain instances then the method will be aborted.
+	 * @param
+	 * Row_Values :  An ArrayList of strings representing the values to be added to the new row
+	 * */
 	public void Add_Row(ArrayList<String> Row_Values) {
 		if(Row_Values.size()>this.Number_Of_Columns) {
 			System.out.println("Aborted...\nRow Length Exceeds The Amount Of Registerd Columns ");
@@ -679,6 +750,11 @@ public class Java_Brain {
 		this.CSV_DATA.add(Row_Values);
 		
 	}
+	/**
+	 * The method will remove from the loaded data the entire column corresponding  to the number passed to the method
+	 * @param
+	 * Column_Number : The number of the column which the method should remove
+	 * */
 	public void Remove_Column(int Column_Number) {
 		if(Column_Number > this.Number_Of_Columns) {
 			System.out.println("No Such Column Number In File");
@@ -690,6 +766,11 @@ public class Java_Brain {
 		this.Number_Of_Columns--;
 		this.Column_Info.remove(Column_Number-1);
 	}
+	/**
+	 * The method will remove from the loaded data the entire row corresponding  to the number passed to the method
+	 * @param
+	 * Row_Number : The number of the row which the method should remove
+	 * */
 	public void Remove_Row(int Row_Number) {
 		if(Row_Number > this.Number_Of_Rows) {
 			System.out.println("No Such Row Number In File");
@@ -699,6 +780,18 @@ public class Java_Brain {
 		this.CSV_DATA.remove(Row_Number-1);
 		this.Number_Of_Rows--;
 	}
+	/**
+	 * The method will search the entire column and find the pattern/value specified and replace it with the replacement token
+	 * passed to the method.
+	 * you can use "" as the pattern for blank values in the csv for example
+	 * and replace them with 0 or any value that suits your needs
+	 * @param
+	 * Column_Number : The number of the column on which the method should run
+	 * @param
+	 * Pattern : A string of the pattern or value that should be replaced
+	 * @param
+	 * Replace_With : A string of the pattern or value that will be replaced instead of the old pattern
+	 * */
 	public void Replace_Pattern_In_Column(int Column_Number,String Pattern,String Replace_With) {
 		for(int i =1;i<=this.Number_Of_Rows;i++) {
 			if(this.CSV_Get_Value(i, Column_Number).equals(Pattern)) {
@@ -707,6 +800,14 @@ public class Java_Brain {
 		}
 		
 	}
+	/**
+	 * The method takes a Matrix instance and converts the matrix into a Java_Brain instances
+	 * @param
+	 * source : A Matrix instance which the method will convert
+	 * @return
+	 * A Java_Brain instance containing the values as well as the same shape as the matrix
+	 * that was converted . meaning the same amount of rows and columns 
+	 * */
 	public static Java_Brain Matrix_To_CSV(Matrix source) {
 		Java_Brain output = new Java_Brain();
 		int w = source.Cols;
@@ -725,6 +826,16 @@ public class Java_Brain {
 		
 		return output;
 	}
+	/**
+	 * The method will prompt a GUI window that will allow the user to paint points on a 
+	 * 2D Cartesian Coordinate System and convert the painted points into a Java_Brain data set instance
+	 * @param
+	 * Max_X_Value : The maximum X value of the Cartesian Coordinate System (also the highest value that can be painted)
+	 * @param
+	 * Max_Y_Value : The maximum Y value of the Cartesian Coordinate System (also the highest value that can be painted)
+	 * @return
+	 * A Java_Brain instances containing the painted data points
+	 * */
 	public static Java_Brain Paint_Data(double Max_X_Value,double Max_Y_Value) {
 		Java_Brain result = new Java_Brain();
 		SPlot plot = new SPlot();
@@ -814,9 +925,23 @@ public class Java_Brain {
 	//
 	
 	//Math Utilities
+	/**
+	 * The method performs a standard sigmoid operation
+	 * @param
+	 * x : The value that will be emplaced into the sigmoid operation
+	 * @return
+	 * The result of the sigmoid operation
+	 * */
 	public double Sigmoid(double x) {
 		return (1.0/(1.0 + Math.exp(-x) ));
 	}
+	/**
+	 * The method will calculate the mean of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The Mean value of the selected column
+	 * */
 	public double Get_Column_Mean(int Column_Number) {
 		if(Column_Number < 0 || Column_Number > this.Number_Of_Columns) {
 			System.out.println("Invalid Row Number");
@@ -834,6 +959,13 @@ public class Java_Brain {
 		return mean/Number_Of_Rows;
 		
 	}
+	/**
+	 * The method will calculate the median of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The Median value of the selected column
+	 * */
 	public double Get_Column_Median(int Column_Number) {
 		if(Column_Number < 0 || Column_Number > this.Number_Of_Columns) {
 			System.out.println("Invalid Row Number");
@@ -853,6 +985,13 @@ public class Java_Brain {
 		}
 	
 	}	
+	/**
+	 * The method will calculate the Standard Deviation of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The Standard Deviation value of the selected column
+	 * */
 	public double Get_Column_Standard_Deviation(int Column_Number) {
 		if(Column_Number < 0 || Column_Number > this.Number_Of_Columns) {
 			System.out.println("Invalid Row Number");
@@ -876,10 +1015,24 @@ public class Java_Brain {
 		return sum;
 		
 	}
+	/**
+	 * The method will calculate the variance of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The Variance value of the selected column
+	 * */
 	public double Get_Column_Variance(int Column_Number) {
 		double Deviation = Get_Column_Standard_Deviation(Column_Number);
 		return (Deviation)*(Deviation);
 	}
+	/**
+	 * The method will calculate the covariance of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The Covariance value of the selected column
+	 * */
 	public double Get_Column_Covariance(int Column_X,int Column_Y) {
 		double covar = 0;
 		double x_mean = this.Get_Column_Mean(Column_X);
@@ -889,6 +1042,13 @@ public class Java_Brain {
 		}
 		return covar/(this.Number_Of_Rows-1);
 	}
+	/**
+	 * The method will find the largest value of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The largest value of the selected column
+	 * */
 	public double Get_Max_Value_In_Column(int Column_Number) {
 		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
 		double max = Double.MIN_VALUE;
@@ -900,6 +1060,13 @@ public class Java_Brain {
 		}
 		return max;
 	}
+	/**
+	 * The method will find the smallest value of the specified numeric column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * @return
+	 * The smallest value of the selected column
+	 * */
 	public double Get_Min_Value_In_Column(int Column_Number) {
 		ArrayList<String> col = this.Get_Specific_Column(Column_Number);
 		double min = Double.MAX_VALUE;
@@ -911,6 +1078,11 @@ public class Java_Brain {
 		}
 		return min;
 	}
+	/**
+	 * The method will fill the specified numeric column empty(missing) values with the mean value of the column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * */
 	public void Fill_Missing_With_Column_Mean(int Column_Number) {
 		double mean =0;
 		ArrayList<Integer> positions = new ArrayList<Integer>();
@@ -928,6 +1100,9 @@ public class Java_Brain {
 			this.CSV_Set_Value(positions.get(i), Column_Number, smean);
 		}
 	}
+	/**
+	 * The method will remove all the rows with a missing value in the loaded csv data 
+	 * */
 	public void Remove_Rows_With_Missing_Values() {
 			String ms;
 			ArrayList<Integer> Miss = new ArrayList<Integer>();
@@ -957,6 +1132,11 @@ public class Java_Brain {
 	       			
 		}
 	}
+	/**
+	 * The method will fill the specified numeric column empty(missing) values with the median value of the column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * */
 	public void Fill_Missing_With_Column_Median(int Column_Number) {
 		double median =0;
 		double[] dt = new double[Number_Of_Rows];
@@ -985,6 +1165,11 @@ public class Java_Brain {
 		}
 		
 	}
+	/**
+	 * The method will fill the specified numeric column empty(missing) values with the pattern specified
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * */
 	public void Fill_Missing_With_Pattern(int Column_Number,String Pattern) {
 		String sm;
 		for(int i =1;i <= this.Number_Of_Rows;i++) {
@@ -994,6 +1179,11 @@ public class Java_Brain {
 			}
 		}
 	}
+	/**
+	 * The method will search and count the amount of missing values in a given column
+	 * @param
+	 * Column_Number : The number of the column on which the method should run.
+	 * */
 	public int Number_Of_Missing(int Column_Number) {
 		int miss =0;
 		String ms;
@@ -1005,6 +1195,9 @@ public class Java_Brain {
 		}
 		return miss;
 	}
+	/**
+	 * The method will search and count the amount of missing values in the entire data set
+	 * */
 	public int Number_Of_Missing() {
 		int miss =0;
 		for(int i = 1 ; i<=this.Number_Of_Columns;i++) {
@@ -1012,6 +1205,16 @@ public class Java_Brain {
 		}
 		return miss;
 	}
+	/**
+	 * The method will compute the correlations between all numeric columns in the loaded data set and 
+	 * output a new Java_Brain instance containing 2 columns ,the first columns is the name of the pair 
+	 * and the second column will contain the correlation between the pair
+	 * @param
+	 * Correlation_Type : The type of correlation formula to implement ,the options are - 1)"Spearman" ,
+	 * 2)"Pearson"
+	 * @return
+	 * A Java_Brain instance containing pair of numeric columns and there correlation
+	 * */
 	public Java_Brain Compute_Column_Correlations(String Correlation_Type) {
 		ArrayList<Integer> numeric = new ArrayList<Integer>();
 		for(int i =1;i<=this.Number_Of_Columns;i++) {
@@ -1067,11 +1270,34 @@ public class Java_Brain {
 
 	
 	
-	
+	/**
+	 * The method will compute and return the square distance between two Point instances
+	 * @param
+	 * first : the first Point instance 
+	 * @param
+	 * second : the second point instance
+	 * @return
+	 * The square distance between both points 
+	 * */
 	//Algorithms
 	public double Squared_Point_Distance(Point first, Point second) {
 		return (first.x - second.x)*(first.x - second.x) + (first.y - second.y)*(first.y - second.y) + (first.z - second.z)*(first.z - second.z);
 	}
+	/**
+	 * The method will perform  2 variable linear regression on 2 selected numeric columns using
+	 * a constant statistical formula  (without gradient descent) this method is much faster then using
+	 * the method with gradient descent but may be less accurate
+	 * @param
+	 * X_Values_Column_Number : A number corresponding to a column number in the loaded data set. this is the first variable for your
+	 * linear regression
+	 * @param
+	 * Y_Values_Column_Number : A number corresponding to a column number in the loaded data set. this is the second variable for your
+	 * linear regression
+	 * @return
+	 * A Matrix instance which will contain the linear equation ( y = aX+b ) parameters calculated by the linear regression formula
+	 * The Matrix instance will contain the result as following - Matrix_Body[0][0] will be equal to the constant b
+	 * and Matrix_Body[1][0] will be equal to the (a)X value. 
+	 * */
 	public Matrix Linear_Regression_Static_Formula(int X_Values_Column_Number ,int Y_Values_Column_Number) {
 		ArrayList<String> X_Values = this.Get_Specific_Column(X_Values_Column_Number);
 		ArrayList<String> Y_Values = this.Get_Specific_Column(Y_Values_Column_Number);
@@ -1096,6 +1322,17 @@ public class Java_Brain {
 		return res;
 		
 	}
+	/**
+	 * The method will perform the K Means calculation on the ArrayList of Points instances passed to the method
+	 * @param
+	 * data : An ArrayList of Points instances ( each Point instance contains and X,Y,Z value ).
+	 * @param
+	 * k : the amount of means the algorithm should calculate 
+	 * @param
+	 * number_of_iterations : the amount of learning iterations the algorithm will run
+	 * @return
+	 * An ArrayList of Point instances where each point in the returned ArrayList is a computed mean.
+	 * */
 	public ArrayList<Point> K_Means(ArrayList<Point> data, int k, int number_of_iterations) {
 		Random random_machine = new Random();
 		ArrayList<Point> means = new ArrayList<Point>(k);
@@ -1178,19 +1415,6 @@ public class Java_Brain {
 		
 		
 	}
-	private double Compute_Error_For_Given_Points(ArrayList<String> X_val,ArrayList<String> Y_val,double b,double m) {
-		double totalError=0;
-		double x,y;
-		for(int i = 0 ;i<this.Number_Of_Rows;i++) {
-			x = Double.parseDouble(X_val.get(i));
-			y = Double.parseDouble(Y_val.get(i));
-			
-			totalError += (y - (x * m + b) ) * (y - (x * m + b) );
-		}
-		
-		totalError *= (double)1/(this.Number_Of_Rows);
-		return totalError;
-	}
 	private Matrix Step_Gradient(double Current_B,double Current_M,double Learning_Rate ,int X_COL,int Y_COL) {
 		ArrayList<String> X_val = this.Get_Specific_Column(X_COL);
 		ArrayList<String> Y_val = this.Get_Specific_Column(Y_COL);
@@ -1210,6 +1434,15 @@ public class Java_Brain {
 		return result;
 		
 	}
+	/**
+	 * The method computes the Mean Squared Error for the given parameter ArrayLists
+	 * @param
+	 * Y : An ArrayList of strings containing the original values (usually the real results from your data set)
+	 * @param
+	 * Y_Hat : An ArrayList of String containing the modified values (usually this will be the guess your model made for the Y arraylist) 
+	 * @return
+	 * The Mean Squared Error
+	 * */
 	public double Get_MSE(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		if(Y.size()!= Y_Hat.size()) {
 			System.out.println("Test Groups Have To Be The Same Size");
@@ -1222,6 +1455,15 @@ public class Java_Brain {
 		es/=Y.size();
 		return es;
 	}
+	/**
+	 * The method computes the Mean Absolute Error for the given parameter ArrayLists
+	 * @param
+	 * Y : An ArrayList of strings containing the original values (usually the real results from your data set)
+	 * @param
+	 * Y_Hat : An ArrayList of String containing the modified values (usually this will be the guess your model made for the Y arraylist) 
+	 * @return
+	 * The Mean Absolute Error
+	 * */
 	public double Get_MAE(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		if(Y.size()!= Y_Hat.size()) {
 			System.out.println("Test Groups Have To Be The Same Size");
@@ -1234,7 +1476,16 @@ public class Java_Brain {
 		es/=Y.size();
 		return es;
 	}
-    public  double Get_Pearson_Correlation_Coefficient(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
+	/**
+	 * The method computes the Pearson Correlation Coefficient for the given parameter ArrayLists
+	 * @param
+	 * Y : An ArrayList of strings containing the original values (usually the real results from your data set)
+	 * @param
+	 * Y_Hat : An ArrayList of String containing the modified values (usually this will be the guess your model made for the Y arraylist) 
+	 * @return
+	 * The Pearson Correlation Coefficient
+	 * */ 
+	public  double Get_Pearson_Correlation_Coefficient(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		double r =0;
 		double sigma_xy=0,sigma_x=0,sigma_y=0,sigma_xs=0,sigma_ys=0;
 		ArrayList<Double>y,y_h;
@@ -1251,7 +1502,15 @@ public class Java_Brain {
 		r /= Math.sqrt(  ((Y.size()*sigma_xs - sigma_x*sigma_x)) * ((Y.size()*sigma_ys - sigma_y*sigma_y)) );
 		return r;
 	}
-    public double[] Rankify(ArrayList<String> Y) throws NumberFormatException{
+	/**
+	 * The method take an ArrayList of strings (or just a column from your data set) and calculates the rank
+	 * array for the column / ArrayList of string (where each string is a numeric value)
+	 * @param
+	 * Y : An ArrayList of strings (where the strings are numeric values) to be rankified
+	 * @return
+	 * A Double array of rank ( each i index of the array corresponds to the i'th index of the ArrayList )
+	 * */
+	public double[] Rankify(ArrayList<String> Y) throws NumberFormatException{
     	  	try {
     		double Rank_Y[] = new double[Y.size()]; 
     	      
@@ -1275,6 +1534,15 @@ public class Java_Brain {
     	  		return null;
     	  	}
     }
+	/**
+	 * The method computes the Spearmans Correlation Coefficient for the given parameter ArrayLists
+	 * @param
+	 * Y : An ArrayList of strings containing the original values (usually the real results from your data set)
+	 * @param
+	 * Y_Hat : An ArrayList of String containing the modified values (usually this will be the guess your model made for the Y arraylist) 
+	 * @return
+	 * The Spearmans Correlation Coefficient
+	 * */ 
     public  double Get_Spearmans_Correlation_Coefficient(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
     	double SCC = 0;
     	double rankY[]=this.Rankify(Y),rankYhat[]=this.Rankify(Y_Hat);
@@ -1293,14 +1561,33 @@ public class Java_Brain {
     	
     	return SCC;
 	}
-    
+	/**
+	 * The method computes the R^2 for the given parameter ArrayLists
+	 * @param
+	 * Y : An ArrayList of strings containing the original values (usually the real results from your data set)
+	 * @param
+	 * Y_Hat : An ArrayList of String containing the modified values (usually this will be the guess your model made for the Y arraylist) 
+	 * @return
+	 *  R^2 correlation between given ArrayLists
+	 * */ 
     public double Get_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat) {
 		double R_S = this.Get_Pearson_Correlation_Coefficient(Y, Y_Hat);
 		R_S*=R_S;
 		return R_S;
 		
 	}
-	public double Get_Adjusted_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat,int Indpendent_Variables) {
+    /**
+	 * The method computes the Adjusted R^2 for the given parameter ArrayLists
+	 * @param
+	 * Y : An ArrayList of strings containing the original values (usually the real results from your data set)
+	 * @param
+	 * Y_Hat : An ArrayList of String containing the modified values (usually this will be the guess your model made for the Y arraylist) 
+	 * @param
+	 * Indpendent_Variables : The Number of independent variable or in some text books written as number of predictors
+	 * @return
+	 *  Adjusted R^2 correlation between given ArrayLists
+	 * */ 
+    public double Get_Adjusted_R_Squared(ArrayList<String> Y ,ArrayList<String> Y_Hat,int Indpendent_Variables) {
 		double R_S = this.Get_R_Squared(Y, Y_Hat);
 		double ARS=(1.0-R_S)*(this.Number_Of_Rows-1);
 		ARS/=this.Number_Of_Rows-1-Indpendent_Variables;
@@ -1308,7 +1595,26 @@ public class Java_Brain {
 		return ARS;
 		
 	}
-	public Matrix Confusion_Matrix(Matrix Regression_Weights,int Binary_Column,int[] Sampled_Rows,double Decision_Boundary ) {		
+	/**
+	 * The method will compute the Confusion Matrix for the given variable columns ,the weights for each column and the 
+	 * result column using a decision boundary.
+	 * @param
+	 * Regression_Weights : A Matrix instance which contains the weights corresponding to each variable column (usually this type of matrix 
+	 * if not constructed in a custom way , is a matrix returned by the Logistic Regression method. 
+	 * @param
+	 * Binary_Column : the column number in the loaded data set which contains binary result (1 or 0 ) against which the the 
+	 * guessed values (using the weights and the decision boundary) will be compared 
+	 * @param 
+	 * Sampled_Rows : An array of integer where each integer is a a column number where each column is a variable meaning the i'th
+	 * column corresponds to the i'th weight in the weight matrix .
+	 * @param
+	 * Decision_Boundary : a value between 0.0 and 1.0 this threshold is the boundary for the guess to count as correct or incorrect
+	 * meaning if the decision boundary is 0.75 , all guess below 0.75 count as 0 and all guess above 0.75 count as 1.
+	 * @return
+	 * A 2x2 Matrix that is formated in the following order - Matrix_Body[0][0] = True Positive ,Matrix_Body[1][0] = False Positive,
+	 * Matrix_Body[0][1] = False Negative , Matrix_Body[1][1] = True Negative
+	 * */
+    public Matrix Confusion_Matrix(Matrix Regression_Weights,int Binary_Column,int[] Sampled_Rows,double Decision_Boundary ) {		
 		Matrix CM = new Matrix(2,2);
 		double TruePositive=0;
 		double TrueNegative=0;
@@ -1350,7 +1656,16 @@ public class Java_Brain {
 		CM.Matrix_Body[1][1] =TrueNegative; 
 		return CM;
 	}
-	public void Print_Confusion_Matrix_List_Of_Rates(Matrix Confusion_Matrix,int Number_Sampled) {
+	/**
+	 * The method take a Matrix instance containing the values of the Confusion Matrix and prints to console
+	 * the following measurements - [ Accuracy , Misclassification Rate,Sensitivity,Precision,Recall ]
+	 * @param
+	 * Confusion_Matrix : A Matrix instance of a Confusion Matrix imported or a one generated by the Confusion_Matrix method
+	 * @param
+	 * Number_Sampled : the number of samples tested when creating the confusion matrix (usually the number of rows in the variable columns 
+	 * upon the confusion matrix creation)
+	 * */
+    public void Print_Confusion_Matrix_List_Of_Rates(Matrix Confusion_Matrix,int Number_Sampled) {
 		double TP = Confusion_Matrix.Matrix_Body[0][0];
 		double FP = Confusion_Matrix.Matrix_Body[1][0];
 		double TN = Confusion_Matrix.Matrix_Body[1][1];
@@ -1362,7 +1677,17 @@ public class Java_Brain {
 		System.out.println("Recall : [ " +((TP)/TP+FN)+" ]");
 		
 	}
-	public double Euclidean_Distance(double[] X1,double[] X2) {
+	/**
+	 * The method takes two n variable arrays and computes the Euclidean distance between both of them 
+	 * keep in mind both array must have the same amount of variables 
+	 * @param
+	 * X1 : An array of variables 
+	 * @param
+	 * X2 : An array of variables 
+	 * @return
+	 * The Euclidean distance between the two points
+	 * */
+    public double Euclidean_Distance(double[] X1,double[] X2) {
 		if(X1.length != X2.length) {
 			System.out.println("Both Points Must Contain The Same Amount Of Values");
 			return Double.POSITIVE_INFINITY;
@@ -1374,6 +1699,16 @@ public class Java_Brain {
 			return Math.sqrt(dis);
 		}
 	}
+	/**
+	 * The method takes two n variable arrays and computes the Manhattan distance between both of them 
+	 * keep in mind both array must have the same amount of variables 
+	 * @param
+	 * X1 : An array of variables 
+	 * @param
+	 * X2 : An array of variables 
+	 * @return
+	 * The Manhattan distance between the two points
+	 * */
 	public double Manhattan_Distance(double[] X1,double[] X2) {
 		if(X1.length != X2.length) {
 			System.out.println("Both Points Must Contain The Same Amount Of Values");
@@ -1386,6 +1721,25 @@ public class Java_Brain {
 			return dis;
 		}
 	}
+	/**
+	 * The method will perform kNN on the specified values and compare the result of the KNN
+	 * to the result columns finding the closest neighbour in distance and return a String 
+	 * with the value of the categorical variable for the given new variables.
+	 * @param
+	 * K : the amount of closest neighbours to search for
+	 * @param
+	 * Test_Values : an array of doubles ,each index of the array corresponds to a row in the loaded data set
+	 * and the sample_columns parameter meaning - the i'th value in the Test_Values parameter will be
+	 * Perceived as a value of the i'th column in the Sample_Columns array 
+	 * @param
+	 * Sample_Columns : an array of integers each integer in this array represents a column
+	 * in order to match the Test_Values parameter to the correct desired testing columns
+	 * @param
+	 * Result_Column : the number of the Result column , in KNN it usually is a categorical column
+	 * @return
+	 * A String containing the category that is the closest match to the given Test_Values
+	 *  
+	 * */
 	public String KNN(int K ,double Test_Values[],int Sample_Columns[],int Result_Column) {
 		double distances[] = new double[this.Number_Of_Rows];
 		double x[];
@@ -1426,6 +1780,25 @@ public class Java_Brain {
 		 Arrays.sort(cats);
 		 return categories[cats[cats.length-1]- 1];
 	}
+	/**
+	 * The method will perform kNN on the specified values and compare the result of the KNN
+	 * to the result columns finding the closest neighbour in distance and return a Matrix 
+	 * with the distances of the k neighbours and the rows that correspond to those neighbours
+	 * @param
+	 * K : the amount of closest neighbours to search for
+	 * @param
+	 * Test_Values : an array of doubles ,each index of the array corresponds to a row in the loaded data set
+	 * and the sample_columns parameter meaning - the i'th value in the Test_Values parameter will be
+	 * Perceived as a value of the i'th column in the Sample_Columns array 
+	 * @param
+	 * Sample_Columns : an array of integers each integer in this array represents a column
+	 * in order to match the Test_Values parameter to the correct desired testing columns
+	 * 
+	 * 
+	 * @return
+	 * A Matrix 
+	 * with the distances of the k neighbours and the rows that correspond to those neighbours
+	 * */
 	public Matrix KNN(int K ,double Test_Values[],int Sample_Columns[]) {
 		double distances[] = new double[this.Number_Of_Rows];
 		double x[];
@@ -1458,6 +1831,26 @@ public class Java_Brain {
 		 }
 		return result;
 	}
+	/**
+	 * The method will perform kNN on the specified values in the argument Java_Brain instance and find  KNN
+	 * to the calling Java_Brain instance finding the closest neighbours in distance and returning a Matrix 
+	 * which will represent the distances of each row in the Test_Dataset to all the row in the calling instances data set
+	 * with the distances of the k neighbours and the rows that correspond to those neighbours
+	 * @param
+	 * K : the amount of closest neighbours to search for
+	 * @param
+	 * Test_Dataset : an array of doubles ,each index of the array corresponds to a row in the loaded data set
+	 * and the sample_columns parameter meaning - the i'th value in the Test_Values parameter will be
+	 * Perceived as a value of the i'th column in the Sample_Columns array 
+	 * @param
+	 * Sample_Columns : an array of integers each integer in this array represents a column
+	 * in order to match the Test_Dataset parameter to the correct desired testing columns
+	 * 
+	 * 
+	 * @return
+	 * A Matrix 
+	 * with the distances of the k neighbours of each row in the Test_Dataset and the rows of the calling instance that correspond to those neighbours
+	 * */
 	public Matrix KNN(int K ,Java_Brain Test_Dataset,int Sample_Columns[]) {
 		Matrix Final_Res = new Matrix(Test_Dataset.Number_Of_Rows,(1+K));
 		double xv[] = new double[Sample_Columns.length];
@@ -1476,7 +1869,15 @@ public class Java_Brain {
 		
 		return Final_Res;
 	}
-    public Matrix Get_Variance_Covariance_Matirx(int[] input_Columns) {
+	/**
+	 * The method will compute and return a Matrix instance containing the Variance-Covariance matrix of the
+	 * specified columns
+	 * @param
+	 * input_Columns - the columns which the method should calculate the matrix for
+	 * @return
+	 * A matrix instance containing the ariance-Covariance matrix
+	 * */
+	public Matrix Get_Variance_Covariance_Matirx(int[] input_Columns) {
     	
     	Matrix data = new Matrix(this.Number_Of_Rows,input_Columns.length);
     	Matrix dataOnes = new Matrix(this.Number_Of_Rows,1);
@@ -1505,7 +1906,6 @@ public class Java_Brain {
     	return data;
     	
     }
-
 	private Matrix Step_Gradient(Matrix Current_Weights,double Learning_Rate ,int[] Columns_Of_Sampels,ArrayList<String> True_Y) {
 		int nof = Columns_Of_Sampels.length+1;
 		Matrix Gradients = new Matrix(nof,1);
@@ -1542,6 +1942,21 @@ public class Java_Brain {
 		return Prediction;
 		
 	}
+	/**
+	 * The method performs multivariable linear regression with gradient descent on the selected columns and outputs a matrix if weights 
+	 * @param
+	 * Sample_Columns : an array of integer where each integer is a column number , each column is a variable for which a weight needs
+	 * to be.
+	 * @param
+	 * True_Y : the actual value of the weight in order to increase the accuracy of the prediction with each epoch
+	 * @param
+	 * Leaning_Rate : the learning rate constant (it is recommended to keep the value low usually between 0.001 - 0.0001)
+	 * @param
+	 * number_of_iterations : the number of iterations or Epochs the algorithm will perform
+	 * @return
+	 * A Matrix instance of weight the matrix will be of n x 2 dimension where [0][0] is the constant and [1][0] - [n-1][0] are the
+	 * weight corresponding to the columns specified in the Sample_Columns array 
+	 * */
 	public Matrix Linear_Regression_Gradient_Descent(int[] Sample_Columns,ArrayList<String> True_Y,double Leaning_Rate,int number_of_iterations) {
 		//y = mx + b - for slope calculation
 		Matrix LE = new Matrix(Sample_Columns.length+1,1);
@@ -1551,6 +1966,23 @@ public class Java_Brain {
 		return LE;
 		
 	}
+	/**
+	 * The method performs 2 variable linear regression with gradient descent on the selected columns and outputs a matrix if weights 
+	 * (it is much more faster for computation if you only have 2 variables in compression to the multivariable method)
+	 * @param
+	 * X_Values_Column_Number : an integer that corresponds to a column number 
+	 *  @param
+	 * Y_Values_Column_Number : an integer that corresponds to a column number 
+	 * @param
+	 * True_Y : the actual value of the weight in order to increase the accuracy of the prediction with each epoch
+	 * @param
+	 * Leaning_Rate : the learning rate constant (it is recommended to keep the value low usually between 0.001 - 0.0001)
+	 * @param
+	 * number_of_iterations : the number of iterations or Epochs the algorithm will perform
+	 * @return
+	 * A Matrix instance of weight the matrix will be of 2 x 2 dimension where [0][0] is the constant and [1][0] is the
+	 * weight corresponding to the columns specified in the Sample_Columns array 
+	 * */
 	public Matrix Linear_Regression_Gradient_Descent(int X_Values_Column_Number,int Y_Values_Column_Number,double Leaning_Rate,int number_of_iterations) {
 		
 		Matrix LE = new Matrix(2,1);
@@ -1562,6 +1994,17 @@ public class Java_Brain {
 		return LE;
 		
 	}
+	/**
+	 * The method performs Logistic Regression computing the optimal weights for each variable 
+	 * @param
+	 * Value_Column_Numbers : an array of numeric column numbers which will represent our variables
+	 * @param
+	 * Binary_Category_Number : the column number of the actual result , against this column our gradient descent will compare its guesses
+	 * @param
+	 * number_of_iterations : the number of epochs given for the machine to train and try to learn the weights
+	 * @param
+	 * learning_rate : the constant regulator of our learning rate ,usually its recommended to use values [0.01 - 0.9]
+	 * */
 	public Matrix Logistic_Regression(int Value_Column_Numbers[],int Binary_Category_Number,int number_of_iterations,double learning_rate) {
 		ArrayList<ArrayList<String>> Values = new ArrayList<ArrayList<String>>();
 		for(int i=0;i<Value_Column_Numbers.length;i++) {
