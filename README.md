@@ -60,9 +60,10 @@ Here's Why Java Brain :brain: :
 
 
 ### Installation
-1. Download Both Java Classes(Image and Java_Brain) From The Repository [Go To Repository Folder](https://github.com/MuteJester/Java_Brain/tree/master/Java_Brain)
-2. Copy Both Classes Into Your Projects /src Folder
-3. You Are Ready To Code!
+1. Download Both Java Packages (JSipl and JBrain) From The Repository [Go To Repository Folder](https://github.com/MuteJester/Java_Brain/tree/master/Java_Brain)
+2. Copy Both Packages Into Your Projects /src Folder
+3. Import JBrain.* and JSipl.*
+4. You Are Ready To Code!
 
 <!-- USAGE EXAMPLES -->
 ## Usage
