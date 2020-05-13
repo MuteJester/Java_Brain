@@ -46,7 +46,7 @@ public class Column {
 		String tm;
 		for(int i=0;i<this.Values.size();i++) {
 			tm = this.Values.get(i);
-			if(!tm.matches("[-,+,0-9,.,0-9]+")) {
+			if(!tm.matches("[-,+,0-9,.,0-9,E]+")) {
 				if(!tm.equals("")) {
 					numeric=false;
 				}

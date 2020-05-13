@@ -197,12 +197,12 @@ public class CSV_File {
 	public void Write_CSV(String F_Name) throws IOException {
 			FileWriter csvWriter = new FileWriter(F_Name + ".csv");
 				for(int i=0;i<this.Number_Of_Columns;i++) {
-					csvWriter.append(Data.get(i+1).Column_Name);
+					csvWriter.append(Data.get(i).Column_Name);
 					csvWriter.append(",");
 				}
 			    csvWriter.append("\n");
 			for (int i =0;i<this.Number_Of_Rows;i++) {
-			    csvWriter.append(String.join(",", this.Get_Row(i)));
+			    csvWriter.append(String.join(",", this.Get_Row(i+1)));
 			    csvWriter.append("\n");
 			}
 
@@ -225,7 +225,7 @@ public class CSV_File {
 		}
 		ArrayList<String> Row = new  ArrayList<String>();
 		for (int i = 0; i < this.Number_Of_Columns; i++) {
-			Row.add(this.Get(Row_Number, i));
+			Row.add(this.Get(Row_Number, i+1));
 		}
 		return Row;
 		}

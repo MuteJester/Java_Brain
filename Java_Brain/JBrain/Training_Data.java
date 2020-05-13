@@ -1,5 +1,6 @@
 package JBrain;
 
+import JSipl.Image;
 import JSipl.Matrix;
 
 public class Training_Data {
@@ -11,7 +12,7 @@ public class Training_Data {
 		
 	}
 	
-	public void Load_Columns_As_Data(Java_Brain Data_Set,int[] Data_Column_Number,int Result_Column[]) {
+	public void Load_Data(Java_Brain Data_Set,int[] Data_Column_Number,int Result_Column[]) {
 		this.Data = new Data_Cartridge[Data_Set.Data.Number_Of_Rows];
 		for(int i=0;i<Data_Set.Data.Number_Of_Rows;i++) {
 			double row_values[] = new  double[Data_Column_Number.length];
@@ -28,10 +29,30 @@ public class Training_Data {
 			
 		}
 	}
-	public void Load_Marix_As_Data(Matrix input,Matrix Result) {
-		this.Data = new Data_Cartridge[1];
-		this.Data[0] = new Data_Cartridge(Matrix.Flatten(input),Matrix.Flatten(Result));
+	public void Load_Data(Matrix[] input,double Results[]) {
+		this.Data = new Data_Cartridge[input.length];
+		for(int i = 0 ;i < input.length;i++) {
+			this.Data[i] = new Data_Cartridge(Matrix.Flatten(input[i]),new double[] {Results[i]});
+		}
 	}
+	public void Load_Data(Image[] input,double Results[]) {
+		this.Data = new Data_Cartridge[input.length];
+		for(int i = 0 ;i < input.length;i++) {
+			Matrix im[] = Matrix.Image_Brakedown(input[i]);
+			this.Data[i] = new Data_Cartridge(Matrix.Flatten(im[0]),new double[] {Results[i]});
+		}
+	}
+	public void Load_Data(Image[] input,Image Results[]) {
+		this.Data = new Data_Cartridge[input.length];
+		for(int i = 0 ;i < input.length;i++) {
+			Matrix im[] = Matrix.Image_Brakedown(input[i]);
+			Matrix res[] = Matrix.Image_Brakedown(Results[i]);
+			im[0].Divide(255);
+			res[0].Divide(255);
+			this.Data[i] = new Data_Cartridge(Matrix.Flatten(im[0]),Matrix.Flatten(res[0]));
+		}
+	}
+
 
 	public void Print_Data() {
 		for(int i=0;i<Data.length;i++) {
