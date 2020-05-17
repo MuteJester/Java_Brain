@@ -116,7 +116,9 @@ Java Brain Offers you a method which is a part of the Neural_Net class which all
   * __kNN - k Nearest Neighbors__
   * __Fully Connected Neural Network Constructor class accepting all forms of network topologies for dynamic use__
   * __Q Learning "Custom-fit" Class applicable for any use__
-  * __Statistical error computations like MSE, R^2, Adj-R^2, Pearsons -  for most models__
+  * __Error computations such as MSE,MAE,MPE__
+  * __Correlation computations such as R^2, Adj-R^2, Pearsons,Spearman -__
+  * __Confusion Matrix Construction For A Given Model Weights__
   * __Some of the models have supported validation methods which will automatically compare machine guesses against actual values__
   * __Principal Component Analysis__
   * __Corpus And Bag Of Words Containers__
