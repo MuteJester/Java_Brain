@@ -49,8 +49,8 @@ There are a few Deep Learning And Machine Learning Java libraries out there, but
 At that moment the idea to create a simple plug and play java classes which can be simply dragged into the src folder of any project and functionality of all the tools that the Java Brain library can be quickly and easily accessed and used.
 
 Here's Why Java Brain :brain: :
-* It's Simple As Drag And Drop and you are ready to code!
-* Function and methods are named meaningful names that way it is always clear what are the parameters or what does the method does!
+* It's As Simple As Drag And Drop and you are ready to code!
+* Function and methods are named meaningful names that way it is always clear what are the parameters or what does the method do!
 * CSV handling is all included in the library working with them made much easier trough java code!
 * Developing complex matrix algorithms ? we've got you covered with a dynamic Matrix class filled with quick usful methods strating from eigen value/vector extraction trough basic operations up to decompositions.
 ### Built With
