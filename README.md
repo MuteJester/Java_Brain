@@ -58,6 +58,10 @@ Here's Why Java Brain :brain: :
 * [Inetlij](https://www.jetbrains.com/)
 * [SIPL Image Proccesing Library](https://github.com/MuteJester/Simple_Image_Processing_Library)
 
+### Other Languages
+  You can also a python wrapper for the java brain library , it uses numpy,pandas,sympy and matplotlib inorder to give you the same coding experience as with java brain but under the python language ,all method and class are named and function exactly the same way they would in java,all that is needed to start working with the python version is to drag to 'Python_Brain' .py file into your project folder and import it.
+the usage is the same and the logic is the same.
+
 
 ### Installation
 1. Download Both Java Packages (JSipl and JBrain) From The Repository [Go To Repository Folder](https://github.com/MuteJester/Java_Brain/tree/master/Java_Brain)
